@@ -44,4 +44,9 @@ Card*** generate_possible_pairs(Card*** card_pair_container, Card** possible_car
 
 bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards, int hand_card_count, int table_card_count);
 
+int evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count);
+
+Card** concat_card_arrays(Card** card_arr1, Card** card_arr2, int arr1_len, int arr2_len);
+
+int compare_cards(const void* card1, const void* card2);
 #endif

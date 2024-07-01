@@ -7,6 +7,27 @@ char* get_cards(int card_count){
 	return user_input;	
 }
 
+int value_to_strength(char value){
+	if(value >= 51 && value <= 57){
+		return value-51;
+	}
+	else{
+		switch(value){
+			case 'T':
+				return 8;
+			case 'J':
+				return 9;
+			case 'Q':
+				return 10;
+			case 'K':
+				return 11;
+			case 'A':
+				return 12;
+		}
+	}
+	return 0;
+}
+
 int suite_to_int(char suite){
 	switch(suite){
 	case 'h':
@@ -129,4 +150,35 @@ Card*** generate_possible_pairs(Card*** card_pair_container, Card** possible_car
 	*pair_count = number_of_pairs;
 
 	return card_pair_container;
+}
+
+Card** concat_card_arrays(Card** card_arr1, Card** card_arr2, int arr1_len, int arr2_len){
+	Card** pooled_cards = malloc(sizeof(Card*)*(arr1_len+arr2_len));
+	memcpy(pooled_cards, card_arr1, sizeof(Card*)*arr1_len);
+	memcpy((pooled_cards+arr1_len), card_arr2, sizeof(Card*)*arr2_len);
+	return pooled_cards;
+}
+
+int compare_cards(const void* card1, const void* card2){
+	int card1_str = value_to_strength((*(Card**)card1)->value);
+	int card2_str = value_to_strength((*(Card**)card2)->value);
+
+	return card1_str-card2_str;
+}
+
+int evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count){
+	int pooled_size = hand_card_count + table_card_count;
+	Card** pooled_cards = malloc(sizeof(Card*)*(pooled_size));
+	pooled_cards = concat_card_arrays(hand_cards, table_cards, hand_card_count, table_card_count);
+	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
+
+	return 1; //placeholder
+}
+
+bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards, int hand_card_count, int table_card_count){
+	int hand_value = evaluate_hand(hand_cards, table_cards, hand_card_count, table_card_count);
+	(void) hand_value;
+	(void)hand_cards, (void)opponent_hand;
+	return false;
+
 }

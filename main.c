@@ -39,11 +39,10 @@ int main(int argc, char* argv[]){
 	for(int i = 0; i < opponent_pair_count; i++){
 		print_cards(possible_opponent_pairs[i], 2);
 	}
-
+	is_winning_hand(hand_cards, hand_cards, table_cards, 2, 3);
 	free_card_mem(hand_cards, hand_card_number);
 	free_card_mem(table_cards, table_card_count);
 	free_card_mem(unused_cards, remaining_cards);
-
 
 	return 0;
 }
