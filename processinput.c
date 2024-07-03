@@ -14,15 +14,15 @@ int value_to_strength(char value){
 	else{
 		switch(value){
 			case 'T':
-				return 8;
-			case 'J':
-				return 9;
-			case 'Q':
 				return 10;
-			case 'K':
+			case 'J':
 				return 11;
-			case 'A':
+			case 'Q':
 				return 12;
+			case 'K':
+				return 13;
+			case 'A':
+				return 14;
 		}
 	}
 	return 0;
