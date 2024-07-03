@@ -28,8 +28,8 @@ int value_to_strength(char value){
 	return 0;
 }
 
-int suite_to_int(char suite){
-	switch(suite){
+int suit_to_int(char suit){
+	switch(suit){
 	case 'h':
 		return 1;
 	case 'c':
@@ -43,8 +43,8 @@ int suite_to_int(char suite){
 	}
 }
 
-char int_to_suite(int suite){
-	switch(suite){
+char int_to_suit(int suit){
+	switch(suit){
 	case 1:
 		return 'h';
 	case 2:
@@ -62,7 +62,7 @@ void process_cards(Card** card_container, int number_of_cards, char* card_string
 	for(int i = 0; i < number_of_cards; i++){
 		*(card_container+i) = malloc(sizeof(Card));
 		card_container[i]->value = card_string[3*i];
-		card_container[i]->type = suite_to_int(card_string[(3*i)+1]);
+		card_container[i]->type = suit_to_int(card_string[(3*i)+1]);
 	}
 }
 
@@ -73,7 +73,7 @@ void print_debug(Card** cards, int card_count){
 }
 
 void print_card_information(Card* card){
-	printf("| %c%c ", card->value, int_to_suite(card->type));
+	printf("| %c%c ", card->value, int_to_suit(card->type));
 }
 
 void print_cards(Card** card_container, int num_cards){
@@ -87,7 +87,7 @@ void print_cards(Card** card_container, int num_cards){
 
 bool is_same_card(Card* card_one, Card* card_two){
 	#ifdef DEBUG
-	printf("Comparing %c%c with %c%c \n", card_one->value, int_to_suite(card_one->type), card_two->value, int_to_suite(card_two->type));
+	printf("Comparing %c%c with %c%c \n", card_one->value, int_to_suit(card_one->type), card_two->value, int_to_suit(card_two->type));
 	#endif
 	return ((card_one->value == card_two->value) && (card_one->type == card_two->type)) ? true : false;
 }
@@ -108,7 +108,7 @@ void setup_unused_cards(Card** unused_card_container, int cards_remaining, Card*
 	while(index < cards_remaining){
 		bool added = false;
 		for(int i = 0; i < CARD_VALUE_RANGE; i++){
-			for(int j = 0; j < SUITE_RANGE; j++){
+			for(int j = 0; j < SUIT_RANGE; j++){
 				Card* temp = malloc(sizeof(Card));
 				temp->value = CARD_VALUES[i];
 				temp->type = j+1;
@@ -160,10 +160,59 @@ Card** concat_card_arrays(Card** card_arr1, Card** card_arr2, int arr1_len, int 
 }
 
 int compare_cards(const void* card1, const void* card2){
+	//positive if card1 > card2
 	int card1_str = value_to_strength((*(Card**)card1)->value);
 	int card2_str = value_to_strength((*(Card**)card2)->value);
 
 	return card1_str-card2_str;
+}
+
+bool has_no_duplicate_cards(Card** cards, int num_cards){
+	for(int i = 0; i < num_cards-1; i++){
+		if(cards[i]->value==cards[i+1]->value){
+			#ifdef DEBUG
+			printf("\nduplicates found\n");
+			#endif
+			return false;
+		}
+	}
+	return true;
+}
+
+bool is_flush(Card** cards, int num_cards){
+	for(int i = 0; i < num_cards-1; i++){
+		if(cards[i]->type != cards[i+1]->type){
+			return false;
+		}
+	}
+	return true;
+}
+
+int compare_card_values(Card* card1, Card* card2){
+	int difference = value_to_strength(card1->value) - value_to_strength(card2->value);
+	#ifdef DEBUG
+	printf("\ndifference: %d\n", difference);
+	#endif
+	return difference;
+}
+
+bool is_straight(Card** cards, int num_cards){
+	bool no_duplicates = has_no_duplicate_cards(cards, num_cards);
+	int range1 = compare_card_values(cards[num_cards-1], cards[0]);
+	#ifdef DEBUG
+	printf("\n range: %d with size %d\n", range1, num_cards-1);
+	#endif
+
+	if(cards[num_cards-1]->value == 'A'){
+		int range2 = value_to_strength(cards[num_cards-2]->value)-1;
+		if(range2 == (num_cards-1) && no_duplicates){
+			return true;
+		}
+	}
+	if((range1 == (num_cards-1)) && no_duplicates){
+			return true;
+	}
+	return false;
 }
 
 int evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count){
@@ -172,12 +221,34 @@ int evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, in
 	pooled_cards = concat_card_arrays(hand_cards, table_cards, hand_card_count, table_card_count);
 	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
 
-	return 1; //placeholder
+	if(is_flush(pooled_cards, pooled_size)){
+		printf("flush!");
+	}
+	if(is_straight(pooled_cards, pooled_size)){
+		printf("straight!");
+	}
+	//generate combinations of 5-cards
+/*
+	//pass a sorted array
+	is_royal_flush(pooled_cards, pooled_size);
+	is_straight_flush(pooled_cards, pooled_size);
+	is_four_of_a_kind(pooled_cards, pooled_size);
+	is_full_house(pooled_cards, pooled_size);
+	is_flush(pooled_cards, pooled_size);
+	is_straight(pooled_cards, pooled_size);
+	is_set(pooled_cards, pooled_size);
+	is_two_pair(pooled_cards, pooled_size);
+	is_one_pair(pooled_cards, pooled_size);
+*/
+	return -1; //placeholder
 }
 
 bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards, int hand_card_count, int table_card_count){
-	int hand_value = evaluate_hand(hand_cards, table_cards, hand_card_count, table_card_count);
-	(void) hand_value;
+	int pooled_size = hand_card_count + table_card_count;
+	Card** pooled_cards = malloc(sizeof(Card*)*(pooled_size));
+	pooled_cards = concat_card_arrays(hand_cards, table_cards, hand_card_count, table_card_count);
+	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
+	
 	(void)hand_cards, (void)opponent_hand;
 	return false;
 

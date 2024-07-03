@@ -3,7 +3,7 @@
 #define PROCESSINPUT_H
 #define DECK_SIZE 52
 #define CARD_VALUE_RANGE 13
-#define SUITE_RANGE 4
+#define SUIT_RANGE 4
 
 #include <stdio.h>
 #include <string.h>
@@ -24,9 +24,9 @@ void process_cards(Card** card_container, int number_of_cards, char* card_string
 
 void print_card_information(Card* card);
 
-int suite_to_int(char suite);
+int suit_to_int(char suit);
 
-char int_to_suite(int suite);
+char int_to_suit(int suit);
 
 void print_debug(Card** hand_cards, int hand_card_number);
 
@@ -48,5 +48,12 @@ int evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, in
 
 Card** concat_card_arrays(Card** card_arr1, Card** card_arr2, int arr1_len, int arr2_len);
 
+int value_to_strength(char value);
+
 int compare_cards(const void* card1, const void* card2);
+
+bool is_flush(Card** cards, int num_cards);
+
+bool is_straight(Card** cards, int num_cards);
+
 #endif
