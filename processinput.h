@@ -56,4 +56,24 @@ bool is_flush(Card** cards, int num_cards);
 
 bool is_straight(Card** cards, int num_cards);
 
+bool has_no_duplicate_cards(Card** cards, int num_cards);
+
+int get_card_value_difference(Card* card1, Card* card2);
+
+bool has_same_value(Card* card1, Card* card2);
+
+bool is_straight_flush(Card** cards, int num_cards);
+
+bool is_royal_flush(Card** cards, int num_cards);
+
+bool is_four_of_a_kind(Card** cards, int num_cards);
+
+bool is_full_house(Card** cards, int num_cards);
+
+bool is_set(Card** cards, int num_cards);
+
+bool is_two_pair(Card** cards, int num_cards);
+
+bool is_one_pair(Card** cards, int num_cards);
+
 #endif

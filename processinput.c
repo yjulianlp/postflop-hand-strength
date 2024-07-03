@@ -8,8 +8,8 @@ char* get_cards(int card_count){
 }
 
 int value_to_strength(char value){
-	if(value >= 51 && value <= 57){
-		return value-51;
+	if(value >= 50 && value <= 57){
+		return value-48;
 	}
 	else{
 		switch(value){
@@ -116,9 +116,10 @@ void setup_unused_cards(Card** unused_card_container, int cards_remaining, Card*
 					unused_card_container[index] = temp;
 					index++;
 					added = true;
+					/*
 					printf("added a card: \n");
 					print_card_information(temp);
-					printf("\n\n+++++++++");
+					printf("\n\n+++++++++");*/
 					break;
 				}
 			}
@@ -188,7 +189,7 @@ bool is_flush(Card** cards, int num_cards){
 	return true;
 }
 
-int compare_card_values(Card* card1, Card* card2){
+int get_card_value_difference(Card* card1, Card* card2){
 	int difference = value_to_strength(card1->value) - value_to_strength(card2->value);
 	#ifdef DEBUG
 	printf("\ndifference: %d\n", difference);
@@ -198,10 +199,7 @@ int compare_card_values(Card* card1, Card* card2){
 
 bool is_straight(Card** cards, int num_cards){
 	bool no_duplicates = has_no_duplicate_cards(cards, num_cards);
-	int range1 = compare_card_values(cards[num_cards-1], cards[0]);
-	#ifdef DEBUG
-	printf("\n range: %d with size %d\n", range1, num_cards-1);
-	#endif
+	int range1 = get_card_value_difference(cards[num_cards-1], cards[0]);
 
 	if(cards[num_cards-1]->value == 'A'){
 		int range2 = value_to_strength(cards[num_cards-2]->value)-1;
@@ -215,6 +213,82 @@ bool is_straight(Card** cards, int num_cards){
 	return false;
 }
 
+bool is_straight_flush(Card** cards, int num_cards){
+	return (is_straight(cards, num_cards) && is_flush(cards, num_cards)) ? true : false;
+}
+
+bool is_royal_flush(Card** cards, int num_cards){
+	if(cards[0]->value == 'T' && cards[num_cards-1]->value == 'A'){
+		if(is_straight(cards, num_cards) && is_flush(cards, num_cards)){
+			return true;
+		}
+	}
+	return false;
+}
+
+bool has_same_value(Card* card1, Card* card2){
+	return (card1->value == card2->value) ? true : false;
+}
+
+bool is_four_of_a_kind(Card** cards, int num_cards){
+	//since cards is sorted, if the first card value == 4th card value then it has a four of a kind
+	if(cards[0]->value == cards[3]->value){
+		return true;
+	}
+	if(has_same_value(cards[num_cards-1], cards[num_cards-4])){
+		return true;
+	}
+	return false;
+}
+
+
+bool is_full_house(Card** cards, int num_cards){
+	if(has_same_value(cards[0], cards[1]) && has_same_value(cards[2], cards[num_cards-1])){
+		return true;
+	}
+	if(has_same_value(cards[0], cards[2]) && has_same_value(cards[3], cards[num_cards-1])){
+		return true;
+	}
+	return false;
+}
+
+bool is_set(Card** cards, int num_cards){
+	for(int i = 0 ; i < num_cards-3; i++){
+		if(has_same_value(cards[i], cards[i+2])){
+			return true;
+		}
+	}
+	return false;
+}
+
+bool is_two_pair(Card** cards, int num_cards){
+	int pairs_found = 0;
+	int i = 0;
+	while(i < num_cards-2){
+		if(has_same_value(cards[i], cards[i+1])){
+			pairs_found++;
+			i++;
+		}
+		i++;
+	}
+
+	return (pairs_found == 2) ? true : false;
+}
+
+bool is_one_pair(Card** cards, int num_cards){
+	int pairs_found = 0;
+	int i = 0;
+	while(i < num_cards-2){
+		if(has_same_value(cards[i], cards[i+1])){
+			pairs_found++;
+			i++;
+		}
+		i++;
+	}
+
+	return (pairs_found == 1) ? true : false;
+}
+
 int evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count){
 	int pooled_size = hand_card_count + table_card_count;
 	Card** pooled_cards = malloc(sizeof(Card*)*(pooled_size));
@@ -222,24 +296,34 @@ int evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, in
 	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
 
 	if(is_flush(pooled_cards, pooled_size)){
-		printf("flush!");
+		printf("flush! |");
 	}
 	if(is_straight(pooled_cards, pooled_size)){
-		printf("straight!");
+		printf("straight! |");
+	}
+	if(is_royal_flush(pooled_cards, pooled_size)){
+		printf("royal flush! |");
+	}
+	if(is_straight_flush(pooled_cards, pooled_size)){
+		printf("straight flush! |");
+	}
+	if(is_four_of_a_kind(pooled_cards, pooled_size)){
+		printf("four of a kind! |");
+	}
+	if(is_full_house(pooled_cards, pooled_size)){
+		printf("full house! |");
+	}
+	if(is_set(pooled_cards, pooled_size)){
+		printf("set! |");
+	}
+	if(is_two_pair(pooled_cards, pooled_size)){
+		printf("two pair! |");
+	}
+	if(is_one_pair(pooled_cards, pooled_size)){
+		printf("one pair! |");
 	}
 	//generate combinations of 5-cards
-/*
-	//pass a sorted array
-	is_royal_flush(pooled_cards, pooled_size);
-	is_straight_flush(pooled_cards, pooled_size);
-	is_four_of_a_kind(pooled_cards, pooled_size);
-	is_full_house(pooled_cards, pooled_size);
-	is_flush(pooled_cards, pooled_size);
-	is_straight(pooled_cards, pooled_size);
-	is_set(pooled_cards, pooled_size);
-	is_two_pair(pooled_cards, pooled_size);
-	is_one_pair(pooled_cards, pooled_size);
-*/
+
 	return -1; //placeholder
 }
 

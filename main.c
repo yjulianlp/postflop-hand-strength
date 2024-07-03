@@ -36,9 +36,10 @@ int main(int argc, char* argv[]){
 	Card*** possible_opponent_pairs = malloc(sizeof(Card**)*opponent_pair_count);
 	possible_opponent_pairs = generate_possible_pairs(possible_opponent_pairs, unused_cards, remaining_cards, &opponent_pair_count);
 
+	/*
 	for(int i = 0; i < opponent_pair_count; i++){
 		print_cards(possible_opponent_pairs[i], 2);
-	}
+	}*/
 
 	evaluate_hand(hand_cards, table_cards, 2, 3);
 	//is_winning_hand(hand_cards, hand_cards, table_cards, 2, 3);
