@@ -253,7 +253,7 @@ bool is_full_house(Card** cards, int num_cards){
 }
 
 bool is_set(Card** cards, int num_cards){
-	for(int i = 0 ; i < num_cards-3; i++){
+	for(int i = 0 ; i < num_cards-2; i++){
 		if(has_same_value(cards[i], cards[i+2])){
 			return true;
 		}
