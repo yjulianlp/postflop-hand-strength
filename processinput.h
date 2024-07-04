@@ -11,6 +11,19 @@
 #include <string.h>
 #include <stdbool.h>
 
+enum Hand {
+	HIGHCARD,
+	ONE_PAIR,
+	TWO_PAIR,
+	SET,
+	STRAIGHT,
+	FLUSH,
+	FULL_HOUSE,
+	FOUR_OF_A_KIND,
+	STRAIGHT_FLUSH,
+	ROYAL_FLUSH
+};
+
 typedef struct Card{
 	char value; //1-10 (number cards), 'J', 'Q', 'K', 'A'
 	int type; //hearts: 1, clubs: 2, spades: 3, diamonds: 4
@@ -44,7 +57,7 @@ Card*** generate_possible_pairs(Card*** card_pair_container, Card** possible_car
 
 bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards, int hand_card_count, int table_card_count);
 
-int evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count);
+enum Hand evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count);
 
 Card** concat_card_arrays(Card** card_arr1, Card** card_arr2, int arr1_len, int arr2_len);
 
@@ -72,8 +85,6 @@ bool is_full_house(Card** cards, int num_cards);
 
 bool is_set(Card** cards, int num_cards);
 
-bool is_two_pair(Card** cards, int num_cards);
-
-bool is_one_pair(Card** cards, int num_cards);
+int find_pairs(Card** cards, int num_cards);
 
 #endif

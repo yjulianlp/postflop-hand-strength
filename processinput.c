@@ -261,10 +261,10 @@ bool is_set(Card** cards, int num_cards){
 	return false;
 }
 
-bool is_two_pair(Card** cards, int num_cards){
+int find_pairs(Card** cards, int num_cards){
 	int pairs_found = 0;
 	int i = 0;
-	while(i < num_cards-2){
+	while(i < num_cards-1){
 		if(has_same_value(cards[i], cards[i+1])){
 			pairs_found++;
 			i++;
@@ -272,29 +272,64 @@ bool is_two_pair(Card** cards, int num_cards){
 		i++;
 	}
 
-	return (pairs_found == 2) ? true : false;
+	return pairs_found;
 }
 
-bool is_one_pair(Card** cards, int num_cards){
-	int pairs_found = 0;
-	int i = 0;
-	while(i < num_cards-2){
-		if(has_same_value(cards[i], cards[i+1])){
-			pairs_found++;
-			i++;
-		}
-		i++;
-	}
-
-	return (pairs_found == 1) ? true : false;
-}
-
-int evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count){
+enum Hand evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count){
 	int pooled_size = hand_card_count + table_card_count;
 	Card** pooled_cards = malloc(sizeof(Card*)*(pooled_size));
 	pooled_cards = concat_card_arrays(hand_cards, table_cards, hand_card_count, table_card_count);
 	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
 
+	bool has_straight = is_straight(pooled_cards, pooled_size), has_flush = is_flush(pooled_cards, pooled_size);
+
+	enum Hand strongest_combination = HIGHCARD;
+	if(has_flush){
+		if(has_straight){
+			//straight flush or royal flush
+			if(pooled_cards[0]->value == 'T' && pooled_cards[pooled_size-1]->value == 'A'){
+				strongest_combination = ROYAL_FLUSH;
+			}else{
+				strongest_combination = STRAIGHT_FLUSH;
+			}
+		}else{
+			//flush
+			strongest_combination = FLUSH;
+		}
+	}else{
+		if(is_four_of_a_kind(pooled_cards, pooled_size)){
+			//4 of a kind
+			strongest_combination = FOUR_OF_A_KIND;
+		}else{
+			if(is_full_house(pooled_cards, pooled_size)){
+				strongest_combination = FULL_HOUSE;
+			}
+			else{
+				if(has_straight){
+					strongest_combination = STRAIGHT;
+				}else{
+					if(is_set(pooled_cards, pooled_size)){
+						strongest_combination = SET;
+					}else{
+						//check for two pair or pair
+						int pairs = find_pairs(pooled_cards, pooled_size);
+						switch(pairs){
+						case 2:
+							strongest_combination = TWO_PAIR;
+							break;
+						case 1:
+							strongest_combination = ONE_PAIR;
+							break;
+						default:
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	#ifdef DEBUG
 	if(is_flush(pooled_cards, pooled_size)){
 		printf("flush! |");
 	}
@@ -316,15 +351,16 @@ int evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, in
 	if(is_set(pooled_cards, pooled_size)){
 		printf("set! |");
 	}
-	if(is_two_pair(pooled_cards, pooled_size)){
+	if(find_pairs(pooled_cards, pooled_size) == 2){
 		printf("two pair! |");
 	}
-	if(is_one_pair(pooled_cards, pooled_size)){
+	if(find_pairs(pooled_cards, pooled_size) == 1){
 		printf("one pair! |");
 	}
+	#endif
 	//generate combinations of 5-cards
 
-	return -1; //placeholder
+	return strongest_combination; //placeholder
 }
 
 bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards, int hand_card_count, int table_card_count){
@@ -332,7 +368,6 @@ bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards
 	Card** pooled_cards = malloc(sizeof(Card*)*(pooled_size));
 	pooled_cards = concat_card_arrays(hand_cards, table_cards, hand_card_count, table_card_count);
 	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
-	
 	(void)hand_cards, (void)opponent_hand;
 	return false;
 
