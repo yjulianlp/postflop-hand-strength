@@ -44,6 +44,7 @@ int main(int argc, char* argv[]){
 	enum Hand test_eval = evaluate_hand(hand_cards, table_cards, 2, 3);
 	printf("hand evaluated as value %d \n", test_eval);
 	//is_winning_hand(hand_cards, hand_cards, table_cards, 2, 3);
+
 	free_card_mem(hand_cards, hand_card_number);
 	free_card_mem(table_cards, table_card_count);
 	free_card_mem(unused_cards, remaining_cards);

@@ -29,6 +29,11 @@ typedef struct Card{
 	int type; //hearts: 1, clubs: 2, spades: 3, diamonds: 4
 } Card;
 
+typedef struct Combinations{
+	Card*** combinations;
+	int num_combinations;
+} Combinations;
+
 char* get_cards(int hand_card_count);
 
 void print_hand_cards(int hand_card_count, char* hand_cards);
@@ -86,5 +91,9 @@ bool is_full_house(Card** cards, int num_cards);
 bool is_set(Card** cards, int num_cards);
 
 int find_pairs(Card** cards, int num_cards);
+
+Combinations* generate_hand_combinations(Card** cards, int num_cards);
+
+void free_combinations(Combinations* combo);
 
 #endif

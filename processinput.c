@@ -275,7 +275,66 @@ int find_pairs(Card** cards, int num_cards){
 	return pairs_found;
 }
 
+void free_combinations(Combinations* combo){
+	free(combo->combinations);
+	free(combo);
+}
+
+Combinations* generate_hand_combinations(Card** cards, int num_cards){
+	//generate 5-card combinations from 7 cards
+	int combination_count = 0;
+
+	int num_possible_combinations = (num_cards == 5) ? 1 : ((num_cards == 6) ? 6 : 21); // 5 choose 5, 6 choose 5, 7 choose 5;
+	Card*** possible_combinations = malloc(sizeof(Card**)*num_possible_combinations);
+
+	Combinations* combos = malloc(sizeof(struct Combinations));
+	combos->combinations = possible_combinations;
+	combos->num_combinations = num_possible_combinations;
+
+	if(num_cards == 5){
+		possible_combinations[0] = cards;
+
+		return combos;
+	}
+
+	if(num_cards == 6){
+		for(int i = 0; i < num_cards; i++){
+			possible_combinations[combination_count] = malloc(sizeof(Card*)*5);
+
+			//cards before currently selected card
+			memcpy(possible_combinations[combination_count], cards, sizeof(Card*)*i);
+			//cards after currently selected card
+			memcpy(possible_combinations[combination_count]+i, cards+(i+1), sizeof(Card*)*(num_cards-(i+1)));
+
+			combination_count++;
+		}
+
+		return combos;
+	}
+
+	//for 7 cards
+	for(int i = 0; i < num_cards; i++){
+		for(int j = i+1; j < num_cards; j++){
+
+			possible_combinations[combination_count] = malloc(sizeof(Card*)*5);
+			int before_cards = i, between_cards = j-(i+1), after_cards = num_cards-(j+1);
+			//cards before the first selected card
+			memcpy(possible_combinations[combination_count], cards, sizeof(Card*)*before_cards);
+			//cards between the two selected cards
+			memcpy(possible_combinations[combination_count]+i, cards+(i+1), sizeof(Card*)*between_cards);
+			//cards after the second selected card
+			memcpy(possible_combinations[combination_count]+before_cards+between_cards, cards+(j+1), sizeof(Card*)*after_cards);
+			
+			combination_count++;
+		}
+	}
+
+	return combos;
+}
+
+
 enum Hand evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count){
+
 	int pooled_size = hand_card_count + table_card_count;
 	Card** pooled_cards = malloc(sizeof(Card*)*(pooled_size));
 	pooled_cards = concat_card_arrays(hand_cards, table_cards, hand_card_count, table_card_count);
