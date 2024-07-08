@@ -1,61 +1,12 @@
 #include "processinput.h"
+#include "handranking.h"
+#include <assert.h>
 
 char* get_cards(int card_count){
 	char* user_input = malloc(sizeof(char)*( card_count*3));
 	fgets(user_input, sizeof(char)*(card_count*3)+1, stdin);
 
 	return user_input;	
-}
-
-int value_to_strength(char value){
-	if(value >= 50 && value <= 57){
-		return value-48;
-	}
-	else{
-		switch(value){
-			case 'T':
-				return 10;
-			case 'J':
-				return 11;
-			case 'Q':
-				return 12;
-			case 'K':
-				return 13;
-			case 'A':
-				return 14;
-		}
-	}
-	return 0;
-}
-
-int suit_to_int(char suit){
-	switch(suit){
-	case 'h':
-		return 1;
-	case 'c':
-		return 2;
-	case 's':
-		return 3;
-	case 'd':
-		return 4;
-	default:
-		return -1;
-	}
-}
-
-char int_to_suit(int suit){
-	switch(suit){
-	case 1:
-		return 'h';
-	case 2:
-		return 'c';
-	case 3:
-		return 's';
-	case 4:
-		return 'd';
-	default:
-		return -1;
-	}
 }
 
 void process_cards(Card** card_container, int number_of_cards, char* card_string){
@@ -160,121 +111,6 @@ Card** concat_card_arrays(Card** card_arr1, Card** card_arr2, int arr1_len, int 
 	return pooled_cards;
 }
 
-int compare_cards(const void* card1, const void* card2){
-	//positive if card1 > card2
-	int card1_str = value_to_strength((*(Card**)card1)->value);
-	int card2_str = value_to_strength((*(Card**)card2)->value);
-
-	return card1_str-card2_str;
-}
-
-bool has_no_duplicate_cards(Card** cards, int num_cards){
-	for(int i = 0; i < num_cards-1; i++){
-		if(cards[i]->value==cards[i+1]->value){
-			#ifdef DEBUG
-			printf("\nduplicates found\n");
-			#endif
-			return false;
-		}
-	}
-	return true;
-}
-
-bool is_flush(Card** cards, int num_cards){
-	for(int i = 0; i < num_cards-1; i++){
-		if(cards[i]->type != cards[i+1]->type){
-			return false;
-		}
-	}
-	return true;
-}
-
-int get_card_value_difference(Card* card1, Card* card2){
-	int difference = value_to_strength(card1->value) - value_to_strength(card2->value);
-	#ifdef DEBUG
-	printf("\ndifference: %d\n", difference);
-	#endif
-	return difference;
-}
-
-bool is_straight(Card** cards, int num_cards){
-	bool no_duplicates = has_no_duplicate_cards(cards, num_cards);
-	int range1 = get_card_value_difference(cards[num_cards-1], cards[0]);
-
-	if(cards[num_cards-1]->value == 'A'){
-		int range2 = value_to_strength(cards[num_cards-2]->value)-1;
-		if(range2 == (num_cards-1) && no_duplicates){
-			return true;
-		}
-	}
-	if((range1 == (num_cards-1)) && no_duplicates){
-			return true;
-	}
-	return false;
-}
-
-bool is_straight_flush(Card** cards, int num_cards){
-	return (is_straight(cards, num_cards) && is_flush(cards, num_cards)) ? true : false;
-}
-
-bool is_royal_flush(Card** cards, int num_cards){
-	if(cards[0]->value == 'T' && cards[num_cards-1]->value == 'A'){
-		if(is_straight(cards, num_cards) && is_flush(cards, num_cards)){
-			return true;
-		}
-	}
-	return false;
-}
-
-bool has_same_value(Card* card1, Card* card2){
-	return (card1->value == card2->value) ? true : false;
-}
-
-bool is_four_of_a_kind(Card** cards, int num_cards){
-	//since cards is sorted, if the first card value == 4th card value then it has a four of a kind
-	if(cards[0]->value == cards[3]->value){
-		return true;
-	}
-	if(has_same_value(cards[num_cards-1], cards[num_cards-4])){
-		return true;
-	}
-	return false;
-}
-
-
-bool is_full_house(Card** cards, int num_cards){
-	if(has_same_value(cards[0], cards[1]) && has_same_value(cards[2], cards[num_cards-1])){
-		return true;
-	}
-	if(has_same_value(cards[0], cards[2]) && has_same_value(cards[3], cards[num_cards-1])){
-		return true;
-	}
-	return false;
-}
-
-bool is_set(Card** cards, int num_cards){
-	for(int i = 0 ; i < num_cards-2; i++){
-		if(has_same_value(cards[i], cards[i+2])){
-			return true;
-		}
-	}
-	return false;
-}
-
-int find_pairs(Card** cards, int num_cards){
-	int pairs_found = 0;
-	int i = 0;
-	while(i < num_cards-1){
-		if(has_same_value(cards[i], cards[i+1])){
-			pairs_found++;
-			i++;
-		}
-		i++;
-	}
-
-	return pairs_found;
-}
-
 void free_combinations(Combinations* combo){
 	free(combo->combinations);
 	free(combo);
@@ -331,22 +167,92 @@ Combinations* generate_hand_combinations(Card** cards, int num_cards){
 
 	return combos;
 }
+int tiebreaker(Card** hand1, Card** hand2, int num_cards, enum Hand_Ranking hand_rank){
+	//return a positive int if hand1 stronger than hand2, negative if hand2 strongest than hand1 (0 if same)
+	assert(hand2);
+	printf("\npassed assert");
 
+	int difference = 0;
+	switch(hand_rank){
+	case ROYAL_FLUSH:
+		return 0;
+	case STRAIGHT_FLUSH:
+		int hand1_offset = (is_wheel(hand1, num_cards)) ? 2 : 1;
+		int hand2_offset = (is_wheel(hand2, num_cards)) ? 2 : 1;
+		difference = compare_cards(hand1[num_cards-hand1_offset], hand2[num_cards-hand2_offset]);
+		return difference;
+	case FOUR_OF_A_KIND:
+		difference = tiebreak_four_of_a_kind(hand1, hand2);
+		return difference;
+	case FULL_HOUSE:
+		return tiebreak_full_house(hand1, hand2);
+	case FLUSH:
+		return tiebreak_flush(hand1, hand2, num_cards);
+	case STRAIGHT:
+		return tiebreak_straight(hand1, hand2, num_cards);
+	case SET:
+		return tiebreak_set(hand1, hand2, num_cards);
+	case TWO_PAIR:
+		return tiebreak_two_pair(hand1, hand2, num_cards);
+	case ONE_PAIR:
+		return tiebreak_one_pair(hand1, hand2, num_cards);
+	case HIGHCARD:
+		return tiebreak_highcard(hand1, hand2, num_cards);
+	}
+	return 0;
+}
 
-enum Hand evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count){
-
-	int pooled_size = hand_card_count + table_card_count;
-	Card** pooled_cards = malloc(sizeof(Card*)*(pooled_size));
-	pooled_cards = concat_card_arrays(hand_cards, table_cards, hand_card_count, table_card_count);
+Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, int num_table_cards){
+	int pooled_size = num_hand_cards + num_table_cards;
+	Card** pooled_cards = malloc(sizeof(Card*)*pooled_size);
+	pooled_cards = concat_card_arrays(hand_cards, table_cards, num_hand_cards, num_table_cards);
 	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
 
-	bool has_straight = is_straight(pooled_cards, pooled_size), has_flush = is_flush(pooled_cards, pooled_size);
+	//generate 5-card combinations
+	Combinations* combos = generate_hand_combinations(pooled_cards, pooled_size);
 
-	enum Hand strongest_combination = HIGHCARD;
+	enum Hand_Ranking strongest_combination_ranking = HIGHCARD;
+	Card** strongest_combination = NULL;
+	for(int i = 0; i < combos->num_combinations; i++){
+		enum Hand_Ranking temp_strength = evaluate_hand(combos->combinations[i], 5);
+		if(temp_strength > strongest_combination_ranking){
+			strongest_combination_ranking = temp_strength;
+			strongest_combination = combos->combinations[i];
+		}else{
+			if(temp_strength == strongest_combination_ranking){
+				//tiebreaker
+				if(strongest_combination){
+					int tiebreak =  tiebreaker(combos->combinations[i], strongest_combination, 5, strongest_combination_ranking);
+					if(tiebreak > 0){
+						strongest_combination = combos->combinations[i];
+						strongest_combination_ranking = temp_strength;
+					}
+				}else{
+					strongest_combination = combos->combinations[i];
+					strongest_combination_ranking = temp_strength;
+				}
+			}
+		}
+	}
+
+	Hand* best_hand = malloc(sizeof(Hand));
+	best_hand->cards = strongest_combination;
+	best_hand->num_cards = 5;
+	best_hand->hand_rank = strongest_combination_ranking;
+
+	return best_hand;
+}
+
+enum Hand_Ranking evaluate_hand(Card** cards, int num_cards){
+	//returns a Hand_Ranking for a 5 card hand (cards must be in sorted order)
+	print_cards(cards, num_cards);
+	bool has_straight = is_straight(cards, num_cards), has_flush = is_flush(cards, num_cards);
+
+	enum Hand_Ranking strongest_combination = HIGHCARD;
 	if(has_flush){
 		if(has_straight){
 			//straight flush or royal flush
-			if(pooled_cards[0]->value == 'T' && pooled_cards[pooled_size-1]->value == 'A'){
+			if(cards[0]->value == 'T' && cards[num_cards-1]->value == 'A'){
 				strongest_combination = ROYAL_FLUSH;
 			}else{
 				strongest_combination = STRAIGHT_FLUSH;
@@ -356,22 +262,22 @@ enum Hand evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_cou
 			strongest_combination = FLUSH;
 		}
 	}else{
-		if(is_four_of_a_kind(pooled_cards, pooled_size)){
+		if(is_four_of_a_kind(cards, num_cards)){
 			//4 of a kind
 			strongest_combination = FOUR_OF_A_KIND;
 		}else{
-			if(is_full_house(pooled_cards, pooled_size)){
+			if(is_full_house(cards, num_cards)){
 				strongest_combination = FULL_HOUSE;
 			}
 			else{
 				if(has_straight){
 					strongest_combination = STRAIGHT;
 				}else{
-					if(is_set(pooled_cards, pooled_size)){
+					if(is_set(cards, num_cards)){
 						strongest_combination = SET;
 					}else{
 						//check for two pair or pair
-						int pairs = find_pairs(pooled_cards, pooled_size);
+						int pairs = find_pairs(cards, num_cards);
 						switch(pairs){
 						case 2:
 							strongest_combination = TWO_PAIR;
@@ -388,38 +294,35 @@ enum Hand evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_cou
 		}
 	}
 
-	#ifdef DEBUG
-	if(is_flush(pooled_cards, pooled_size)){
+	if(is_flush(cards, num_cards)){
 		printf("flush! |");
 	}
-	if(is_straight(pooled_cards, pooled_size)){
+	if(is_straight(cards, num_cards)){
 		printf("straight! |");
 	}
-	if(is_royal_flush(pooled_cards, pooled_size)){
+	if(is_royal_flush(cards, num_cards)){
 		printf("royal flush! |");
 	}
-	if(is_straight_flush(pooled_cards, pooled_size)){
+	if(is_straight_flush(cards, num_cards)){
 		printf("straight flush! |");
 	}
-	if(is_four_of_a_kind(pooled_cards, pooled_size)){
+	if(is_four_of_a_kind(cards, num_cards)){
 		printf("four of a kind! |");
 	}
-	if(is_full_house(pooled_cards, pooled_size)){
+	if(is_full_house(cards, num_cards)){
 		printf("full house! |");
 	}
-	if(is_set(pooled_cards, pooled_size)){
+	if(is_set(cards, num_cards)){
 		printf("set! |");
 	}
-	if(find_pairs(pooled_cards, pooled_size) == 2){
+	if(find_pairs(cards, num_cards) == 2){
 		printf("two pair! |");
 	}
-	if(find_pairs(pooled_cards, pooled_size) == 1){
+	if(find_pairs(cards, num_cards) == 1){
 		printf("one pair! |");
 	}
-	#endif
-	//generate combinations of 5-cards
 
-	return strongest_combination; //placeholder
+	return strongest_combination;
 }
 
 bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards, int hand_card_count, int table_card_count){
@@ -430,4 +333,19 @@ bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards
 	(void)hand_cards, (void)opponent_hand;
 	return false;
 
+}
+
+int compare_cards(const void* card1, const void* card2){
+	//positive if card1 > card2
+	int card1_str = value_to_strength((*(Card**)card1)->value);
+	int card2_str = value_to_strength((*(Card**)card2)->value);
+
+	return card1_str-card2_str;
+}
+
+Card** add_card(Card** hand, Card* card, int hand_size){
+	hand = realloc(hand, sizeof(Card*)*(hand_size+1));
+	hand[hand_size] = card;
+
+	return hand;
 }

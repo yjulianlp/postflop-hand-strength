@@ -36,15 +36,15 @@ int main(int argc, char* argv[]){
 	Card*** possible_opponent_pairs = malloc(sizeof(Card**)*opponent_pair_count);
 	possible_opponent_pairs = generate_possible_pairs(possible_opponent_pairs, unused_cards, remaining_cards, &opponent_pair_count);
 
-	/*
-	for(int i = 0; i < opponent_pair_count; i++){
-		print_cards(possible_opponent_pairs[i], 2);
-	}*/
-
-	enum Hand test_eval = evaluate_hand(hand_cards, table_cards, 2, 3);
+	Card** cards = concat_card_arrays(hand_cards, table_cards, 2, 3);
+	qsort(cards, 5, sizeof(Card*), compare_cards);
+	enum Hand_Ranking test_eval = evaluate_hand(cards, 5);
 	printf("hand evaluated as value %d \n", test_eval);
 	//is_winning_hand(hand_cards, hand_cards, table_cards, 2, 3);
 
+	Hand* best = get_best_hand(hand_cards, table_cards, 2, 3);
+
+	printf("\nbest hand value is %d \n", best->hand_rank);
 	free_card_mem(hand_cards, hand_card_number);
 	free_card_mem(table_cards, table_card_count);
 	free_card_mem(unused_cards, remaining_cards);

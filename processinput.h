@@ -1,38 +1,6 @@
 #ifndef PROCESSINPUT_H
-
 #define PROCESSINPUT_H
-#define DECK_SIZE 52
-#define CARD_VALUE_RANGE 13
-#define SUIT_RANGE 4
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-enum Hand {
-	HIGHCARD,
-	ONE_PAIR,
-	TWO_PAIR,
-	SET,
-	STRAIGHT,
-	FLUSH,
-	FULL_HOUSE,
-	FOUR_OF_A_KIND,
-	STRAIGHT_FLUSH,
-	ROYAL_FLUSH
-};
-
-typedef struct Card{
-	char value; //1-10 (number cards), 'J', 'Q', 'K', 'A'
-	int type; //hearts: 1, clubs: 2, spades: 3, diamonds: 4
-} Card;
-
-typedef struct Combinations{
-	Card*** combinations;
-	int num_combinations;
-} Combinations;
+#include "gameinfo.h"
 
 char* get_cards(int hand_card_count);
 
@@ -41,10 +9,6 @@ void print_hand_cards(int hand_card_count, char* hand_cards);
 void process_cards(Card** card_container, int number_of_cards, char* card_string);
 
 void print_card_information(Card* card);
-
-int suit_to_int(char suit);
-
-char int_to_suit(int suit);
 
 void print_debug(Card** hand_cards, int hand_card_number);
 
@@ -62,38 +26,18 @@ Card*** generate_possible_pairs(Card*** card_pair_container, Card** possible_car
 
 bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards, int hand_card_count, int table_card_count);
 
-enum Hand evaluate_hand(Card** hand_cards, Card** table_cards, int hand_card_count, int table_card_count);
+enum Hand_Ranking evaluate_hand(Card** cards, int num_cards);
 
 Card** concat_card_arrays(Card** card_arr1, Card** card_arr2, int arr1_len, int arr2_len);
-
-int value_to_strength(char value);
-
-int compare_cards(const void* card1, const void* card2);
-
-bool is_flush(Card** cards, int num_cards);
-
-bool is_straight(Card** cards, int num_cards);
-
-bool has_no_duplicate_cards(Card** cards, int num_cards);
-
-int get_card_value_difference(Card* card1, Card* card2);
-
-bool has_same_value(Card* card1, Card* card2);
-
-bool is_straight_flush(Card** cards, int num_cards);
-
-bool is_royal_flush(Card** cards, int num_cards);
-
-bool is_four_of_a_kind(Card** cards, int num_cards);
-
-bool is_full_house(Card** cards, int num_cards);
-
-bool is_set(Card** cards, int num_cards);
-
-int find_pairs(Card** cards, int num_cards);
 
 Combinations* generate_hand_combinations(Card** cards, int num_cards);
 
 void free_combinations(Combinations* combo);
+
+Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, int num_table_cards);
+
+int compare_cards(const void* card1, const void* card2);
+
+Card** add_card(Card** hand, Card* card, int hand_size);
 
 #endif
