@@ -226,13 +226,13 @@ int suit_to_int(char suit){
 
 char int_to_suit(int suit){
 	switch(suit){
-	case 1:
+	case HEART:
 		return 'h';
-	case 2:
+	case CLUB:
 		return 'c';
-	case 3:
+	case SPADE:
 		return 's';
-	case 4:
+	case DIAMOND:
 		return 'd';
 	default:
 		return -1;

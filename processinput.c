@@ -3,10 +3,20 @@
 #include <assert.h>
 
 char* get_cards(int card_count){
-	char* user_input = malloc(sizeof(char)*( card_count*3));
+	char* user_input = malloc(sizeof(char)*(card_count*3));
 	fgets(user_input, sizeof(char)*(card_count*3)+1, stdin);
 
 	return user_input;	
+}
+
+Card* get_card(void){
+	char* user_input = malloc(sizeof(char)*3);
+	fgets(user_input, 3, stdin);
+	Card* temp_card = malloc(sizeof(Card));
+	temp_card->value = user_input[0];
+	temp_card->type = suit_to_int(user_input[1]);
+
+	return temp_card;
 }
 
 void process_cards(Card** card_container, int number_of_cards, char* card_string){
@@ -170,7 +180,7 @@ Combinations* generate_hand_combinations(Card** cards, int num_cards){
 int tiebreaker(Card** hand1, Card** hand2, int num_cards, enum Hand_Ranking hand_rank){
 	//return a positive int if hand1 stronger than hand2, negative if hand2 strongest than hand1 (0 if same)
 	assert(hand2);
-	printf("\npassed assert");
+	printf("\npassed assert\n");
 
 	int difference = 0;
 	switch(hand_rank){
@@ -208,6 +218,9 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 	pooled_cards = concat_card_arrays(hand_cards, table_cards, num_hand_cards, num_table_cards);
 	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
 
+	printf("generating combinations for the cards: \n");
+	print_cards(pooled_cards, pooled_size);
+	printf("\n");
 	//generate 5-card combinations
 	Combinations* combos = generate_hand_combinations(pooled_cards, pooled_size);
 
@@ -245,6 +258,7 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 
 enum Hand_Ranking evaluate_hand(Card** cards, int num_cards){
 	//returns a Hand_Ranking for a 5 card hand (cards must be in sorted order)
+	printf("evaluating the hand: ");
 	print_cards(cards, num_cards);
 	bool has_straight = is_straight(cards, num_cards), has_flush = is_flush(cards, num_cards);
 
@@ -294,32 +308,36 @@ enum Hand_Ranking evaluate_hand(Card** cards, int num_cards){
 		}
 	}
 
-	if(is_flush(cards, num_cards)){
-		printf("flush! |");
-	}
-	if(is_straight(cards, num_cards)){
-		printf("straight! |");
-	}
-	if(is_royal_flush(cards, num_cards)){
-		printf("royal flush! |");
-	}
-	if(is_straight_flush(cards, num_cards)){
-		printf("straight flush! |");
-	}
-	if(is_four_of_a_kind(cards, num_cards)){
-		printf("four of a kind! |");
-	}
-	if(is_full_house(cards, num_cards)){
-		printf("full house! |");
-	}
-	if(is_set(cards, num_cards)){
-		printf("set! |");
-	}
-	if(find_pairs(cards, num_cards) == 2){
-		printf("two pair! |");
-	}
-	if(find_pairs(cards, num_cards) == 1){
-		printf("one pair! |");
+	switch(strongest_combination){
+	case ROYAL_FLUSH:
+		printf("royal flush!\n");
+		break;
+	case STRAIGHT_FLUSH:
+		printf("straight flush!\n");
+		break;
+	case FOUR_OF_A_KIND:
+		printf("four of a kind!\n");
+		break;
+	case FULL_HOUSE:
+		printf("full house!\n");
+		break;
+	case FLUSH:
+		printf("flush!\n");
+		break;
+	case STRAIGHT:
+		printf("straight!\n");
+		break;
+	case SET:
+		printf("set!\n");
+		break;
+	case TWO_PAIR:
+		printf("two pair!\n");
+		break;
+	case ONE_PAIR:
+		printf("one pair!\n");
+		break;
+	default:
+		printf("high card!\n");
 	}
 
 	return strongest_combination;

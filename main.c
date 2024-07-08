@@ -44,7 +44,19 @@ int main(int argc, char* argv[]){
 
 	Hand* best = get_best_hand(hand_cards, table_cards, 2, 3);
 
+	printf("\n\ntesting multiple combinations\n\n");
+	printf("Enter the turn card: ");
+	Card* temp_card = get_card();
+	table_cards = add_card(table_cards, temp_card, table_card_count);
+	best = get_best_hand(hand_cards, table_cards, 2, 4);
+
+
 	printf("\nbest hand value is %d \n", best->hand_rank);
+	printf("for the combination: \n");
+	print_cards(best->cards, best->num_cards);
+	printf("\n");
+
+
 	free_card_mem(hand_cards, hand_card_number);
 	free_card_mem(table_cards, table_card_count);
 	free_card_mem(unused_cards, remaining_cards);

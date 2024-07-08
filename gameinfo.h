@@ -24,9 +24,16 @@ enum Hand_Ranking {
 	ROYAL_FLUSH
 };
 
+enum Suit {
+	HEART = 1,
+	CLUB = 2,
+	SPADE = 3,
+	DIAMOND = 4
+};
+
 typedef struct Card{
-	char value; //1-10 (number cards), 'J', 'Q', 'K', 'A'
-	int type; //hearts: 1, clubs: 2, spades: 3, diamonds: 4
+	char value; //'1'-'9', 'T', 'J', 'Q', 'K', 'A'
+	enum Suit type; 
 } Card;
 
 typedef struct Combinations{

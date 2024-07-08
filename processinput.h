@@ -40,4 +40,6 @@ int compare_cards(const void* card1, const void* card2);
 
 Card** add_card(Card** hand, Card* card, int hand_size);
 
+Card* get_card(void);
+
 #endif
