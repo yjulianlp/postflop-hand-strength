@@ -1,4 +1,6 @@
 #include "processinput.h"
+#include "managecards.h"
+#include "cardinfo.h"
 
 int main(int argc, char* argv[]){
 	if(argc<2){
@@ -24,18 +26,21 @@ int main(int argc, char* argv[]){
 
 	//cards not in hand and not on table
 	int remaining_cards = DECK_SIZE-hand_card_number-table_card_count;
-	Card* unused_cards[remaining_cards]; 
+	Card** unused_cards = malloc(sizeof(Card*)*remaining_cards); 
 
-	setup_unused_cards(unused_cards, remaining_cards, hand_cards, table_cards, hand_card_number, table_card_count);
-
-	printf("Currently unused cards: \n\n\n++++++++++++++++++++++++++++++++++");
-	print_cards(unused_cards, remaining_cards);
-
+	unused_cards = setup_unused_cards(unused_cards, remaining_cards, hand_cards, table_cards, hand_card_number, table_card_count);
+	qsort(unused_cards, remaining_cards, sizeof(Card*), compare_cards);
 
 	int opponent_pair_count = 0;
-	Card*** possible_opponent_pairs = malloc(sizeof(Card**)*opponent_pair_count);
-	possible_opponent_pairs = generate_possible_pairs(possible_opponent_pairs, unused_cards, remaining_cards, &opponent_pair_count);
+	printf("allocating memory\n");
+	Card*** possible_opponent_pairs = malloc(sizeof(Card**)*(opponent_pair_count));
+	printf("running");
+	possible_opponent_pairs = generate_possible_pairs(unused_cards, remaining_cards, &opponent_pair_count);
 
+	printf("pair count: %d\n", opponent_pair_count);
+	for(int i = 0; i < (opponent_pair_count); i++){
+		print_cards(possible_opponent_pairs[i], 2);
+	}
 	Card** cards = concat_card_arrays(hand_cards, table_cards, 2, 3);
 	qsort(cards, 5, sizeof(Card*), compare_cards);
 	enum Hand_Ranking test_eval = evaluate_hand(cards, 5);
@@ -55,7 +60,6 @@ int main(int argc, char* argv[]){
 	printf("for the combination: \n");
 	print_cards(best->cards, best->num_cards);
 	printf("\n");
-
 
 	free_card_mem(hand_cards, hand_card_number);
 	free_card_mem(table_cards, table_card_count);

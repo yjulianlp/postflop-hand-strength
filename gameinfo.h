@@ -32,7 +32,7 @@ enum Suit {
 };
 
 typedef struct Card{
-	char value; //'1'-'9', 'T', 'J', 'Q', 'K', 'A'
+	char value; //'2'-'9', 'T', 'J', 'Q', 'K', 'A'
 	enum Suit type; 
 } Card;
 

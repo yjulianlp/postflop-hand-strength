@@ -2,6 +2,7 @@
 #define HANDRANKING_H
 #include "gameinfo.h"
 #include <stdbool.h>
+#include "cardinfo.h"
 
 int find_pairs(Card** cards, int num_cards);
 
@@ -21,18 +22,6 @@ bool is_set(Card** cards, int num_cards);
 
 bool is_wheel(Card** hand, int num_cards);
 
-bool has_no_duplicate_cards(Card** cards, int num_cards);
-
-bool has_same_value(Card* card1, Card* card2);
-
-int get_card_value_difference(Card* card1, Card* card2);
-
-int value_to_strength(char value);
-
-int suit_to_int(char suit);
-
-char int_to_suit(int suit);
-
 int tiebreak_full_house(Card** hand1, Card** hand2);
 
 int tiebreak_four_of_a_kind(Card** hand1, Card** hand2);
@@ -49,6 +38,5 @@ int tiebreak_one_pair(Card** hand1, Card** hand2, int num_cards);
 
 int tiebreak_highcard(Card** hand1, Card** hand2, int num_cards);
 
-int value_difference(Card* card1, Card* card2);
-
+int tiebreaker(Card** hand1, Card** hand2, int num_cards, enum Hand_Ranking hand_rank);
 #endif

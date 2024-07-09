@@ -8,21 +8,15 @@ void print_hand_cards(int hand_card_count, char* hand_cards);
 
 void process_cards(Card** card_container, int number_of_cards, char* card_string);
 
-void print_card_information(Card* card);
-
 void print_debug(Card** hand_cards, int hand_card_number);
 
-bool is_same_card(Card* card_one, Card* card_two);
-
-void setup_unused_cards(Card** unused_card_container, int cards_remaining, Card** hand_cards, Card** table_cards, int hand_size, int table_size);
-
-void print_cards(Card** card_container, int num_cards);
+Card** setup_unused_cards(Card** unused_card_container, int cards_remaining, Card** hand_cards, Card** table_cards, int hand_size, int table_size);
 
 bool is_in_use(Card* card, Card** cards_to_check, int num_cards_to_check);
 
 void free_card_mem(Card** card_container, int num_cards);
 
-Card*** generate_possible_pairs(Card*** card_pair_container, Card** possible_cards, int num_possible_cards, int* pair_count);
+Card*** generate_possible_pairs(Card** possible_cards, int num_possible_cards, int* pair_count);
 
 bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards, int hand_card_count, int table_card_count);
 

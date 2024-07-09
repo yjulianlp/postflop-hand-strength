@@ -1,6 +1,6 @@
 #include "processinput.h"
 #include "handranking.h"
-#include <assert.h>
+#include "cardinfo.h"
 
 char* get_cards(int card_count){
 	char* user_input = malloc(sizeof(char)*(card_count*3));
@@ -33,26 +33,6 @@ void print_debug(Card** cards, int card_count){
 	}
 }
 
-void print_card_information(Card* card){
-	printf("| %c%c ", card->value, int_to_suit(card->type));
-}
-
-void print_cards(Card** card_container, int num_cards){
-	printf("\n+++++++++++\n");
-	for(int i = 0; i < num_cards; i++){
-		print_card_information(card_container[i]);
-	}
-	printf("|");
-	printf("\n+++++++++++\n");
-}
-
-bool is_same_card(Card* card_one, Card* card_two){
-	#ifdef DEBUG
-	printf("Comparing %c%c with %c%c \n", card_one->value, int_to_suit(card_one->type), card_two->value, int_to_suit(card_two->type));
-	#endif
-	return ((card_one->value == card_two->value) && (card_one->type == card_two->type)) ? true : false;
-}
-
 bool is_in_use(Card* card, Card** cards_to_check, int num_cards_to_check){
 	for(int i = 0; i < num_cards_to_check; i++){
 		if(is_same_card(card, cards_to_check[i])){
@@ -62,7 +42,7 @@ bool is_in_use(Card* card, Card** cards_to_check, int num_cards_to_check){
 	return false;
 }
 
-void setup_unused_cards(Card** unused_card_container, int cards_remaining, Card** hand_cards, Card** table_cards, int hand_size, int table_size){
+Card** setup_unused_cards(Card** unused_card_container, int cards_remaining, Card** hand_cards, Card** table_cards, int hand_size, int table_size){
 	char CARD_VALUES[13] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
 
 	int index = 0;
@@ -89,6 +69,8 @@ void setup_unused_cards(Card** unused_card_container, int cards_remaining, Card*
 			}
 		}
 	}
+
+	return unused_card_container;
 }
 
 void free_card_mem(Card** card_container, int num_cards){
@@ -97,22 +79,22 @@ void free_card_mem(Card** card_container, int num_cards){
 	}
 }
 
-Card*** generate_possible_pairs(Card*** card_pair_container, Card** possible_cards, int num_possible_cards, int* pair_count){
-	int number_of_pairs = *pair_count;
+Card*** generate_possible_pairs(Card** possible_cards, int num_possible_cards, int* pair_count){
+	printf("generating pairs\n");
+	Card*** temp_container = malloc(sizeof(Card**)*0);
 	for(int i = 0; i < num_possible_cards; i++){
 		for(int j = i+1; j < num_possible_cards; j++){
 			Card** temp_pair_arr = malloc(sizeof(Card*)*2);
 			temp_pair_arr[0] = possible_cards[i];
 			temp_pair_arr[1] = possible_cards[j];
-			card_pair_container = realloc(card_pair_container, sizeof(Card**)*(++number_of_pairs));
-			card_pair_container[number_of_pairs-1] = temp_pair_arr;
+			temp_container = realloc(temp_container, sizeof(Card**)*(++(*pair_count)));
+			temp_container[(*pair_count)-1] = temp_pair_arr;
 		}
 	}
 
-	*pair_count = number_of_pairs;
-
-	return card_pair_container;
+	return temp_container;
 }
+
 
 Card** concat_card_arrays(Card** card_arr1, Card** card_arr2, int arr1_len, int arr2_len){
 	Card** pooled_cards = malloc(sizeof(Card*)*(arr1_len+arr2_len));
@@ -176,40 +158,6 @@ Combinations* generate_hand_combinations(Card** cards, int num_cards){
 	}
 
 	return combos;
-}
-int tiebreaker(Card** hand1, Card** hand2, int num_cards, enum Hand_Ranking hand_rank){
-	//return a positive int if hand1 stronger than hand2, negative if hand2 strongest than hand1 (0 if same)
-	assert(hand2);
-	printf("\npassed assert\n");
-
-	int difference = 0;
-	switch(hand_rank){
-	case ROYAL_FLUSH:
-		return 0;
-	case STRAIGHT_FLUSH:
-		int hand1_offset = (is_wheel(hand1, num_cards)) ? 2 : 1;
-		int hand2_offset = (is_wheel(hand2, num_cards)) ? 2 : 1;
-		difference = compare_cards(hand1[num_cards-hand1_offset], hand2[num_cards-hand2_offset]);
-		return difference;
-	case FOUR_OF_A_KIND:
-		difference = tiebreak_four_of_a_kind(hand1, hand2);
-		return difference;
-	case FULL_HOUSE:
-		return tiebreak_full_house(hand1, hand2);
-	case FLUSH:
-		return tiebreak_flush(hand1, hand2, num_cards);
-	case STRAIGHT:
-		return tiebreak_straight(hand1, hand2, num_cards);
-	case SET:
-		return tiebreak_set(hand1, hand2, num_cards);
-	case TWO_PAIR:
-		return tiebreak_two_pair(hand1, hand2, num_cards);
-	case ONE_PAIR:
-		return tiebreak_one_pair(hand1, hand2, num_cards);
-	case HIGHCARD:
-		return tiebreak_highcard(hand1, hand2, num_cards);
-	}
-	return 0;
 }
 
 Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, int num_table_cards){
@@ -357,6 +305,9 @@ int compare_cards(const void* card1, const void* card2){
 	//positive if card1 > card2
 	int card1_str = value_to_strength((*(Card**)card1)->value);
 	int card2_str = value_to_strength((*(Card**)card2)->value);
+	if(card1_str == card2_str){ //if same value
+		return suit_difference((*(Card**)card1), (*(Card**)card2));
+	}
 
 	return card1_str-card2_str;
 }

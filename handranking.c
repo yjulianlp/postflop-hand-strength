@@ -1,4 +1,7 @@
 #include "handranking.h"
+#include "cardinfo.h"
+#include <assert.h>
+
 bool is_flush(Card** cards, int num_cards){
 	for(int i = 0; i < num_cards-1; i++){
 		if(cards[i]->type != cards[i+1]->type){
@@ -22,7 +25,7 @@ int tiebreak_flush(Card** hand1, Card** hand2, int num_cards){
 
 bool is_straight(Card** cards, int num_cards){
 	bool no_duplicates = has_no_duplicate_cards(cards, num_cards);
-	int range1 = get_card_value_difference(cards[num_cards-1], cards[0]);
+	int range1 = value_difference(cards[num_cards-1], cards[0]);
 
 	if(cards[num_cards-1]->value == 'A'){
 		int range2 = value_to_strength(cards[num_cards-2]->value)-1;
@@ -164,86 +167,6 @@ bool is_wheel(Card** hand, int num_cards){
 		return false;
 }
 
-bool has_no_duplicate_cards(Card** cards, int num_cards){
-	for(int i = 0; i < num_cards-1; i++){
-		if(cards[i]->value==cards[i+1]->value){
-			#ifdef DEBUG
-			printf("\nduplicates found\n");
-			#endif
-			return false;
-		}
-	}
-	return true;
-}
-
-bool has_same_value(Card* card1, Card* card2){
-	return (card1->value == card2->value) ? true : false;
-}
-
-int get_card_value_difference(Card* card1, Card* card2){
-	int difference = value_to_strength(card1->value) - value_to_strength(card2->value);
-	#ifdef DEBUG
-	printf("\ndifference: %d\n", difference);
-	#endif
-	return difference;
-}
-
-int value_to_strength(char value){
-	if(value >= 50 && value <= 57){
-		return value-48;
-	}
-	else{
-		switch(value){
-			case 'T':
-				return 10;
-			case 'J':
-				return 11;
-			case 'Q':
-				return 12;
-			case 'K':
-				return 13;
-			case 'A':
-				return 14;
-		}
-	}
-	return 0;
-}
-
-int suit_to_int(char suit){
-	switch(suit){
-	case 'h':
-		return 1;
-	case 'c':
-		return 2;
-	case 's':
-		return 3;
-	case 'd':
-		return 4;
-	default:
-		return -1;
-	}
-}
-
-char int_to_suit(int suit){
-	switch(suit){
-	case HEART:
-		return 'h';
-	case CLUB:
-		return 'c';
-	case SPADE:
-		return 's';
-	case DIAMOND:
-		return 'd';
-	default:
-		return -1;
-	}
-}
-
-int value_difference(Card* card1, Card* card2){
-	//positive if card1 > card2
-	return value_to_strength(card1->value) - value_to_strength(card2->value);
-}
-
 int find_pairs(Card** cards, int num_cards){
 	int pairs_found = 0;
 	int i = 0;
@@ -319,6 +242,41 @@ int tiebreak_highcard(Card** hand1, Card** hand2, int num_cards){
 		if(difference!=0){
 			return difference;
 		}
+	}
+	return 0;
+}
+
+int tiebreaker(Card** hand1, Card** hand2, int num_cards, enum Hand_Ranking hand_rank){
+	//return a positive int if hand1 stronger than hand2, negative if hand2 strongest than hand1 (0 if same)
+	assert(hand2);
+	printf("\npassed assert\n");
+
+	int difference = 0;
+	switch(hand_rank){
+	case ROYAL_FLUSH:
+		return 0;
+	case STRAIGHT_FLUSH:
+		int hand1_offset = (is_wheel(hand1, num_cards)) ? 2 : 1;
+		int hand2_offset = (is_wheel(hand2, num_cards)) ? 2 : 1;
+		difference = value_difference(hand1[num_cards-hand1_offset], hand2[num_cards-hand2_offset]);
+		return difference;
+	case FOUR_OF_A_KIND:
+		difference = tiebreak_four_of_a_kind(hand1, hand2);
+		return difference;
+	case FULL_HOUSE:
+		return tiebreak_full_house(hand1, hand2);
+	case FLUSH:
+		return tiebreak_flush(hand1, hand2, num_cards);
+	case STRAIGHT:
+		return tiebreak_straight(hand1, hand2, num_cards);
+	case SET:
+		return tiebreak_set(hand1, hand2, num_cards);
+	case TWO_PAIR:
+		return tiebreak_two_pair(hand1, hand2, num_cards);
+	case ONE_PAIR:
+		return tiebreak_one_pair(hand1, hand2, num_cards);
+	case HIGHCARD:
+		return tiebreak_highcard(hand1, hand2, num_cards);
 	}
 	return 0;
 }
