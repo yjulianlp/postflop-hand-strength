@@ -1,6 +1,7 @@
 #include "../include/processinput.h"
 #include "../include/handranking.h"
 #include "../include/cardinfo.h"
+#include <string.h>
 
 char* get_cards(int card_count){
 	char* user_input = malloc(sizeof(char)*(card_count*3));
@@ -10,8 +11,8 @@ char* get_cards(int card_count){
 }
 
 Card* get_card(void){
-	char* user_input = malloc(sizeof(char)*3);
-	fgets(user_input, 3, stdin);
+	char* user_input = malloc(sizeof(char)*4);
+	fgets(user_input, 4, stdin);
 	Card* temp_card = malloc(sizeof(Card));
 	temp_card->value = user_input[0];
 	temp_card->type = suit_to_int(user_input[1]);
@@ -166,9 +167,12 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 	pooled_cards = concat_card_arrays(hand_cards, table_cards, num_hand_cards, num_table_cards);
 	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
 
+	#ifdef DEBUG
 	printf("generating combinations for the cards: \n");
 	print_cards(pooled_cards, pooled_size);
 	printf("\n");
+	#endif
+
 	//generate 5-card combinations
 	Combinations* combos = generate_hand_combinations(pooled_cards, pooled_size);
 
@@ -206,8 +210,10 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 
 enum Hand_Ranking evaluate_hand(Card** cards, int num_cards){
 	//returns a Hand_Ranking for a 5 card hand (cards must be in sorted order)
+	#ifdef DEBUG
 	printf("evaluating the hand: ");
 	print_cards(cards, num_cards);
+	#endif
 	bool has_straight = is_straight(cards, num_cards), has_flush = is_flush(cards, num_cards);
 
 	enum Hand_Ranking strongest_combination = HIGHCARD;
@@ -256,6 +262,7 @@ enum Hand_Ranking evaluate_hand(Card** cards, int num_cards){
 		}
 	}
 
+	#ifdef DEBUG
 	switch(strongest_combination){
 	case ROYAL_FLUSH:
 		printf("royal flush!\n");
@@ -287,18 +294,18 @@ enum Hand_Ranking evaluate_hand(Card** cards, int num_cards){
 	default:
 		printf("high card!\n");
 	}
+	#endif
 
 	return strongest_combination;
 }
 
-bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards, int hand_card_count, int table_card_count){
-	int pooled_size = hand_card_count + table_card_count;
-	Card** pooled_cards = malloc(sizeof(Card*)*(pooled_size));
-	pooled_cards = concat_card_arrays(hand_cards, table_cards, hand_card_count, table_card_count);
-	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
-	(void)hand_cards, (void)opponent_hand;
-	return false;
+bool is_winning_hand(Hand* hand1, Hand* hand2){
+	if(hand1->hand_rank == hand2->hand_rank){
+		int difference = tiebreaker(hand1->cards, hand2->cards, hand1->num_cards, hand1->hand_rank);
+		return (difference > 0);
+	}
 
+	return (hand1->hand_rank - hand2->hand_rank) > 0;
 }
 
 int compare_cards(const void* card1, const void* card2){
@@ -310,11 +317,4 @@ int compare_cards(const void* card1, const void* card2){
 	}
 
 	return card1_str-card2_str;
-}
-
-Card** add_card(Card** hand, Card* card, int hand_size){
-	hand = realloc(hand, sizeof(Card*)*(hand_size+1));
-	hand[hand_size] = card;
-
-	return hand;
 }

@@ -17,7 +17,6 @@ int main(int argc, char* argv[]){
 	process_cards(hand_cards, hand_card_number, hand_card_input);
 
 	printf("Enter the cards on the table: (e.g. Kc-Th-3s)");
-	fflush(stdout);
 
 	int table_card_count = 3;
 	char *table_card_input = get_cards(table_card_count);
@@ -32,15 +31,9 @@ int main(int argc, char* argv[]){
 	qsort(unused_cards, remaining_cards, sizeof(Card*), compare_cards);
 
 	int opponent_pair_count = 0;
-	printf("allocating memory\n");
 	Card*** possible_opponent_pairs = malloc(sizeof(Card**)*(opponent_pair_count));
-	printf("running");
 	possible_opponent_pairs = generate_possible_pairs(unused_cards, remaining_cards, &opponent_pair_count);
 
-	printf("pair count: %d\n", opponent_pair_count);
-	for(int i = 0; i < (opponent_pair_count); i++){
-		print_cards(possible_opponent_pairs[i], 2);
-	}
 	Card** cards = concat_card_arrays(hand_cards, table_cards, 2, 3);
 	qsort(cards, 5, sizeof(Card*), compare_cards);
 	enum Hand_Ranking test_eval = evaluate_hand(cards, 5);
@@ -48,18 +41,37 @@ int main(int argc, char* argv[]){
 	//is_winning_hand(hand_cards, hand_cards, table_cards, 2, 3);
 
 	Hand* best = get_best_hand(hand_cards, table_cards, 2, 3);
+	printf("\nbest hand value is %d \n", best->hand_rank);
+	printf("for the combination: \n");
+	print_cards(best->cards, best->num_cards);
+	printf("\n");
 
-	printf("\n\ntesting multiple combinations\n\n");
 	printf("Enter the turn card: ");
 	Card* temp_card = get_card();
-	table_cards = add_card(table_cards, temp_card, table_card_count);
-	best = get_best_hand(hand_cards, table_cards, 2, 4);
 
+	possible_opponent_pairs = remove_pairs_with_card(possible_opponent_pairs, temp_card, &opponent_pair_count);
+	unused_cards = remove_card(unused_cards, temp_card, &remaining_cards);
+	table_cards = add_card(table_cards, temp_card, &table_card_count);
+	best = get_best_hand(hand_cards, table_cards, 2, table_card_count);
 
 	printf("\nbest hand value is %d \n", best->hand_rank);
 	printf("for the combination: \n");
 	print_cards(best->cards, best->num_cards);
 	printf("\n");
+
+	//river
+	printf("Enter the river card: ");
+	temp_card = get_card();
+	possible_opponent_pairs = remove_pairs_with_card(possible_opponent_pairs, temp_card, &opponent_pair_count);
+	unused_cards = remove_card(unused_cards, temp_card, &remaining_cards);
+	table_cards = add_card(table_cards, temp_card, &table_card_count);
+	best = get_best_hand(hand_cards, table_cards, 2, table_card_count);
+
+	printf("\nbest hand value is %d \n", best->hand_rank);
+	printf("for the combination: \n");
+	print_cards(best->cards, best->num_cards);
+	printf("\n");
+
 
 	free_card_mem(hand_cards, hand_card_number);
 	free_card_mem(table_cards, table_card_count);

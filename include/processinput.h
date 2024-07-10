@@ -18,7 +18,7 @@ void free_card_mem(Card** card_container, int num_cards);
 
 Card*** generate_possible_pairs(Card** possible_cards, int num_possible_cards, int* pair_count);
 
-bool is_winning_hand(Card** hand_cards, Card** opponent_hand, Card** table_cards, int hand_card_count, int table_card_count);
+bool is_winning_hand(Hand* hand1, Hand* hand2);
 
 enum Hand_Ranking evaluate_hand(Card** cards, int num_cards);
 
@@ -31,8 +31,6 @@ void free_combinations(Combinations* combo);
 Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, int num_table_cards);
 
 int compare_cards(const void* card1, const void* card2);
-
-Card** add_card(Card** hand, Card* card, int hand_size);
 
 Card* get_card(void);
 

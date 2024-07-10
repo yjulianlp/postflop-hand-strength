@@ -5,8 +5,10 @@ VPATH = ../include
 build: main.c processinput.o handranking.o managecards.o cardinfo.o
 	$(CC) $(CFLAGS) cardinfo.o managecards.o handranking.o processinput.o main.c -o main
 
+debug: CFLAGS = -Wall -Wextra -Werror -std=c99 -D DEBUG
+
 debug: main.c processinput.o handranking.o managecards.o cardinfo.o
-	$(CC) $(CFLAGS) -ggdb -D DEBUG cardinfo.o managecards.o handranking.o processinput.o main.c -o debug
+	$(CC) $(CFLAGS) -ggdb cardinfo.o managecards.o handranking.o processinput.o main.c -o debug
 
 cardinfo.o: gameinfo.h cardinfo.h cardinfo.c
 	$(CC) $(CFLAGS) -c cardinfo.c -o cardinfo.o

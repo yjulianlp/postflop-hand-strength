@@ -11,9 +11,6 @@ int suit_difference(Card* card1, Card* card2){
 }
 
 bool is_same_card(Card* card_one, Card* card_two){
-	#ifdef DEBUG
-	printf("Comparing %c%c with %c%c \n", card_one->value, int_to_suit(card_one->type), card_two->value, int_to_suit(card_two->type));
-	#endif
 	return ((card_one->value == card_two->value) && (card_one->type == card_two->type)) ? true : false;
 }
 
@@ -24,9 +21,6 @@ bool has_same_value(Card* card1, Card* card2){
 bool has_no_duplicate_cards(Card** cards, int num_cards){
 	for(int i = 0; i < num_cards-1; i++){
 		if(cards[i]->value==cards[i+1]->value){
-			#ifdef DEBUG
-			printf("\nduplicates found\n");
-			#endif
 			return false;
 		}
 	}

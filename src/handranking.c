@@ -249,7 +249,6 @@ int tiebreak_highcard(Card** hand1, Card** hand2, int num_cards){
 int tiebreaker(Card** hand1, Card** hand2, int num_cards, enum Hand_Ranking hand_rank){
 	//return a positive int if hand1 stronger than hand2, negative if hand2 strongest than hand1 (0 if same)
 	assert(hand2);
-	printf("\npassed assert\n");
 
 	int difference = 0;
 	switch(hand_rank){
