@@ -6,7 +6,7 @@ char* get_cards(int hand_card_count);
 
 void print_hand_cards(int hand_card_count, char* hand_cards);
 
-void process_cards(Card** card_container, int number_of_cards, char* card_string);
+Card** process_cards(int num_cards, char* card_string);
 
 void print_debug(Card** hand_cards, int hand_card_number);
 

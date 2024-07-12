@@ -4,8 +4,8 @@
 #include <string.h>
 
 char* get_cards(int card_count){
-	char* user_input = malloc(sizeof(char)*(card_count*3));
-	fgets(user_input, sizeof(char)*(card_count*3)+1, stdin);
+	char* user_input = malloc(sizeof(char)*(card_count*3)+1);
+	fgets(user_input, sizeof(char)*(card_count*3)+2, stdin);
 
 	return user_input;	
 }
@@ -16,16 +16,20 @@ Card* get_card(void){
 	Card* temp_card = malloc(sizeof(Card));
 	temp_card->value = user_input[0];
 	temp_card->type = suit_to_int(user_input[1]);
+	free(user_input);
 
 	return temp_card;
 }
 
-void process_cards(Card** card_container, int number_of_cards, char* card_string){
-	for(int i = 0; i < number_of_cards; i++){
+Card** process_cards(int num_cards, char* card_string){
+	Card** card_container = malloc(sizeof(Card*)*num_cards);
+	for(int i = 0; i < num_cards; i++){
 		*(card_container+i) = malloc(sizeof(Card));
 		card_container[i]->value = card_string[3*i];
 		card_container[i]->type = suit_to_int(card_string[(3*i)+1]);
 	}
+
+	return card_container;
 }
 
 void print_debug(Card** cards, int card_count){
@@ -58,11 +62,9 @@ Card** setup_unused_cards(Card** unused_card_container, int cards_remaining, Car
 					unused_card_container[index] = temp;
 					index++;
 					added = true;
-					/*
-					printf("added a card: \n");
-					print_card_information(temp);
-					printf("\n\n+++++++++");*/
 					break;
+				}else{
+					free(temp);
 				}
 			}
 			if(added){
@@ -78,11 +80,13 @@ void free_card_mem(Card** card_container, int num_cards){
 	for(int i = 0; i < num_cards; i++){
 		free(card_container[i]);
 	}
+
+	free(card_container);
 }
 
 Card*** generate_possible_pairs(Card** possible_cards, int num_possible_cards, int* pair_count){
 	printf("generating pairs\n");
-	Card*** temp_container = malloc(sizeof(Card**)*0);
+	Card*** temp_container = NULL;
 	for(int i = 0; i < num_possible_cards; i++){
 		for(int j = i+1; j < num_possible_cards; j++){
 			Card** temp_pair_arr = malloc(sizeof(Card*)*2);
@@ -104,7 +108,10 @@ Card** concat_card_arrays(Card** card_arr1, Card** card_arr2, int arr1_len, int 
 	return pooled_cards;
 }
 
-void free_combinations(Combinations* combo){
+void free_combo_struct(Combinations* combo, int num_combinations){
+	for(int i = 0; i < num_combinations; i++){
+		free(combo->combinations[i]);
+	}
 	free(combo->combinations);
 	free(combo);
 }
@@ -114,26 +121,27 @@ Combinations* generate_hand_combinations(Card** cards, int num_cards){
 	int combination_count = 0;
 
 	int num_possible_combinations = (num_cards == 5) ? 1 : ((num_cards == 6) ? 6 : 21); // 5 choose 5, 6 choose 5, 7 choose 5;
-	Card*** possible_combinations = malloc(sizeof(Card**)*num_possible_combinations);
 
 	Combinations* combos = malloc(sizeof(struct Combinations));
-	combos->combinations = possible_combinations;
+	combos->combinations = malloc(sizeof(Card**)*num_possible_combinations);
 	combos->num_combinations = num_possible_combinations;
 
 	if(num_cards == 5){
-		possible_combinations[0] = cards;
+		combos->combinations[0] = malloc(sizeof(Card*)*5);
+		memcpy(combos->combinations[0], cards, sizeof(Card*)*5);
+		//possible_combinations[0] = cards;
 
 		return combos;
 	}
 
 	if(num_cards == 6){
 		for(int i = 0; i < num_cards; i++){
-			possible_combinations[combination_count] = malloc(sizeof(Card*)*5);
+			combos->combinations[combination_count] = malloc(sizeof(Card*)*5);
 
 			//cards before currently selected card
-			memcpy(possible_combinations[combination_count], cards, sizeof(Card*)*i);
+			memcpy(combos->combinations[combination_count], cards, sizeof(Card*)*i);
 			//cards after currently selected card
-			memcpy(possible_combinations[combination_count]+i, cards+(i+1), sizeof(Card*)*(num_cards-(i+1)));
+			memcpy(combos->combinations[combination_count]+i, cards+(i+1), sizeof(Card*)*(num_cards-(i+1)));
 
 			combination_count++;
 		}
@@ -145,14 +153,14 @@ Combinations* generate_hand_combinations(Card** cards, int num_cards){
 	for(int i = 0; i < num_cards; i++){
 		for(int j = i+1; j < num_cards; j++){
 
-			possible_combinations[combination_count] = malloc(sizeof(Card*)*5);
+			combos->combinations[combination_count] = malloc(sizeof(Card*)*5);
 			int before_cards = i, between_cards = j-(i+1), after_cards = num_cards-(j+1);
 			//cards before the first selected card
-			memcpy(possible_combinations[combination_count], cards, sizeof(Card*)*before_cards);
+			memcpy(combos->combinations[combination_count], cards, sizeof(Card*)*before_cards);
 			//cards between the two selected cards
-			memcpy(possible_combinations[combination_count]+i, cards+(i+1), sizeof(Card*)*between_cards);
+			memcpy(combos->combinations[combination_count]+i, cards+(i+1), sizeof(Card*)*between_cards);
 			//cards after the second selected card
-			memcpy(possible_combinations[combination_count]+before_cards+between_cards, cards+(j+1), sizeof(Card*)*after_cards);
+			memcpy(combos->combinations[combination_count]+before_cards+between_cards, cards+(j+1), sizeof(Card*)*after_cards);
 			
 			combination_count++;
 		}
@@ -163,8 +171,7 @@ Combinations* generate_hand_combinations(Card** cards, int num_cards){
 
 Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, int num_table_cards){
 	int pooled_size = num_hand_cards + num_table_cards;
-	Card** pooled_cards = malloc(sizeof(Card*)*pooled_size);
-	pooled_cards = concat_card_arrays(hand_cards, table_cards, num_hand_cards, num_table_cards);
+	Card** pooled_cards = concat_card_arrays(hand_cards, table_cards, num_hand_cards, num_table_cards);
 	qsort(pooled_cards, pooled_size, sizeof(Card*), compare_cards);
 
 	#ifdef DEBUG
@@ -175,9 +182,10 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 
 	//generate 5-card combinations
 	Combinations* combos = generate_hand_combinations(pooled_cards, pooled_size);
-
+	free(pooled_cards);
 	enum Hand_Ranking strongest_combination_ranking = HIGHCARD;
 	Card** strongest_combination = NULL;
+
 	for(int i = 0; i < combos->num_combinations; i++){
 		enum Hand_Ranking temp_strength = evaluate_hand(combos->combinations[i], 5);
 		if(temp_strength > strongest_combination_ranking){
@@ -189,10 +197,12 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 				if(strongest_combination){
 					int tiebreak =  tiebreaker(combos->combinations[i], strongest_combination, 5, strongest_combination_ranking);
 					if(tiebreak > 0){
+						
 						strongest_combination = combos->combinations[i];
 						strongest_combination_ranking = temp_strength;
 					}
 				}else{
+					
 					strongest_combination = combos->combinations[i];
 					strongest_combination_ranking = temp_strength;
 				}
@@ -200,11 +210,14 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 		}
 	}
 
+	
+
 	Hand* best_hand = malloc(sizeof(Hand));
-	best_hand->cards = strongest_combination;
+	best_hand->cards = malloc(sizeof(Card*)*5);
+	memcpy(best_hand->cards, strongest_combination, sizeof(Card*)*5);
 	best_hand->num_cards = 5;
 	best_hand->hand_rank = strongest_combination_ranking;
-
+	free_combo_struct(combos, combos->num_combinations);
 	return best_hand;
 }
 

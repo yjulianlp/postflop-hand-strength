@@ -34,9 +34,20 @@ Card** remove_card(Card** cards, Card* card_to_remove, int* num_cards){
 	}
 
 	swap_cards(cards, index, (*num_cards)-1);
+	free(cards[(*num_cards)-1]);
 	cards = realloc(cards, sizeof(Card*)*((*num_cards)-1));
 	(*num_cards)--;
 	return cards;
+}
+
+void free_pair_mem(Card** pair){
+	free(pair[0]);
+	free(pair[1]);
+	free(pair);
+}
+
+void free_pair_arr(Card** pair){
+	free(pair);
 }
 
 Card*** remove_pairs_with_card(Card*** card_pair_array, Card* card, int* num_pairs){
@@ -44,11 +55,13 @@ Card*** remove_pairs_with_card(Card*** card_pair_array, Card* card, int* num_pai
 	while(index < (*num_pairs)){
 		if(is_same_card(card_pair_array[index][0], card) || is_same_card(card_pair_array[index][1], card)){
 			if(index == (*num_pairs-1)){
+				free_pair_arr(card_pair_array[(*num_pairs)-1]);
 				card_pair_array = realloc(card_pair_array, sizeof(Card**)*((*num_pairs)-1));
 				(*num_pairs)--;
 				index++;
 			}else{
 				swap_pairs(card_pair_array, index, (*num_pairs)-1);
+				free_pair_arr(card_pair_array[(*num_pairs)-1]);
 				card_pair_array = realloc(card_pair_array, sizeof(Card**)*((*num_pairs)-1));
 				(*num_pairs)--;		
 			}
@@ -81,4 +94,9 @@ Card** add_card(Card** hand, Card* card, int* hand_size){
 	hand[(*hand_size)] = card;
 	(*hand_size)++;
 	return hand;
+}
+
+void free_hand_struct(Hand* hand){
+	free(hand->cards);
+	free(hand);
 }

@@ -46,4 +46,5 @@ typedef struct Hand{
 	int num_cards;
 	enum Hand_Ranking hand_rank;
 } Hand;
+
 #endif

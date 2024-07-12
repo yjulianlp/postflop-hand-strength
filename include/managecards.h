@@ -14,4 +14,8 @@ Card*** swap_pairs(Card*** cards, int index_of_pair1, int index_of_pair2);
 
 Card** add_card(Card** hand, Card* card, int* hand_size);
 
+void free_pair_mem(Card** pair);
+
+void free_hand_struct(Hand* hand);
+
 #endif
