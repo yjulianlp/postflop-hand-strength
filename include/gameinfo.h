@@ -47,4 +47,21 @@ typedef struct Hand{
 	enum Hand_Ranking hand_rank;
 } Hand;
 
+typedef struct GameState{
+	Card* added_card;
+	Card** player_hand;
+	Card** opponent_hand;
+	int num_hand_cards;
+	Card** unused_cards;
+	int num_unused_cards;
+	Card** table_cards;
+	int num_table_cards;
+	Hand* best_player_hand;
+	Hand* best_opponent_hand;
+	bool player_win;
+	bool game_over;
+	struct GameState** possible_gamestates;
+	int num_sub_gamestates;
+} GameState;
+
 #endif

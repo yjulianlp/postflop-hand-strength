@@ -1,5 +1,6 @@
 #include "../include/managecards.h"
 #include "../include/cardinfo.h"
+#include "../include/processinput.h"
 
 int find_card(Card** sorted_card_container, Card* card, int container_size){
 	int low = 0, high = container_size-1;
@@ -26,7 +27,7 @@ int find_card(Card** sorted_card_container, Card* card, int container_size){
 	return -1; //not found
 }
 
-Card** remove_card(Card** cards, Card* card_to_remove, int* num_cards){
+Card** remove_card(Card** cards, Card* card_to_remove, int* num_cards, bool free_mem){
 	int index = find_card(cards, card_to_remove, *num_cards);
 
 	if(index == -1){ //card not found
@@ -34,9 +35,14 @@ Card** remove_card(Card** cards, Card* card_to_remove, int* num_cards){
 	}
 
 	swap_cards(cards, index, (*num_cards)-1);
-	free(cards[(*num_cards)-1]);
+	if(free_mem){
+		free(cards[(*num_cards)-1]);
+	}
 	cards = realloc(cards, sizeof(Card*)*((*num_cards)-1));
 	(*num_cards)--;
+
+	qsort(cards, *num_cards, sizeof(Card*), compare_cards);
+	
 	return cards;
 }
 

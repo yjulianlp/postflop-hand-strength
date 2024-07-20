@@ -4,7 +4,7 @@
 
 int find_card(Card** sorted_card_container, Card* card, int container_size);
 
-Card** remove_card(Card** cards, Card* card_to_remove, int* num_cards);
+Card** remove_card(Card** cards, Card* card_to_remove, int* num_cards, bool free_mem);
 
 Card** swap_cards(Card** cards, int index_of_card1, int index_of_card2);
 

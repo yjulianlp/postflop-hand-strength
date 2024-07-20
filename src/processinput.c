@@ -227,6 +227,7 @@ enum Hand_Ranking evaluate_hand(Card** cards, int num_cards){
 	printf("evaluating the hand: ");
 	print_cards(cards, num_cards);
 	#endif
+
 	bool has_straight = is_straight(cards, num_cards), has_flush = is_flush(cards, num_cards);
 
 	enum Hand_Ranking strongest_combination = HIGHCARD;
@@ -313,12 +314,22 @@ enum Hand_Ranking evaluate_hand(Card** cards, int num_cards){
 }
 
 bool is_winning_hand(Hand* hand1, Hand* hand2){
+	int difference;
 	if(hand1->hand_rank == hand2->hand_rank){
-		int difference = tiebreaker(hand1->cards, hand2->cards, hand1->num_cards, hand1->hand_rank);
+		#ifdef DEBUG
+		printf("tiebreaking\n");
+		#endif
+		difference = tiebreaker(hand1->cards, hand2->cards, hand1->num_cards, hand1->hand_rank);
+		#ifdef DEBUG
+		printf("difference in hand value of %d\n", difference);
+		#endif
 		return (difference > 0);
 	}
-
-	return (hand1->hand_rank - hand2->hand_rank) > 0;
+	difference = hand1->hand_rank - hand2->hand_rank;
+	#ifdef DEBUG
+	printf("\ndifference in hand value of %d\n", difference);
+	#endif
+	return (difference > 0);
 }
 
 int compare_cards(const void* card1, const void* card2){

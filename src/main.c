@@ -1,6 +1,7 @@
 #include "../include/processinput.h"
 #include "../include/managecards.h"
 #include "../include/cardinfo.h"
+#include "../include/gamestate.h"
 
 int main(int argc, char* argv[]){
 	if(argc<2){
@@ -45,36 +46,13 @@ int main(int argc, char* argv[]){
 	print_cards(best->cards, best->num_cards);
 	printf("\n");
 
+	//testing gamestates
+	GameState* flop_gamestate = malloc(sizeof(GameState));
+	initialize_gamestate(flop_gamestate, NULL, hand_cards, possible_opponent_pairs[0], hand_card_number, unused_cards, remaining_cards, table_cards, table_card_count, false);
+	print_gamestate_information(flop_gamestate);
+	generate_sub_gamestates(flop_gamestate);
 
-	printf("Enter the turn card: ");
-	Card* temp_card = get_card();
-
-	free_hand_struct(best);
-
-	possible_opponent_pairs = remove_pairs_with_card(possible_opponent_pairs, temp_card, &opponent_pair_count);
-	unused_cards = remove_card(unused_cards, temp_card, &remaining_cards);
-	table_cards = add_card(table_cards, temp_card, &table_card_count);
-	best = get_best_hand(hand_cards, table_cards, 2, table_card_count);
-
-	printf("\nbest hand value is %d \n", best->hand_rank);
-	printf("for the combination: \n");
-	print_cards(best->cards, best->num_cards);
-	printf("\n");
-
-	free_hand_struct(best);
-
-	printf("Enter the river card: ");
-	temp_card = get_card();
-	possible_opponent_pairs = remove_pairs_with_card(possible_opponent_pairs, temp_card, &opponent_pair_count);
-	unused_cards = remove_card(unused_cards, temp_card, &remaining_cards);
-	table_cards = add_card(table_cards, temp_card, &table_card_count);
-	best = get_best_hand(hand_cards, table_cards, 2, table_card_count);
-
-	printf("\nbest hand value is %d \n", best->hand_rank);
-	printf("for the combination: \n");
-	print_cards(best->cards, best->num_cards);
-	printf("\n");
-
+	free_gamestate(flop_gamestate);
 	free_card_mem(hand_cards, hand_card_number);
 	free_card_mem(table_cards, table_card_count);
 	free_card_mem(unused_cards, remaining_cards);
