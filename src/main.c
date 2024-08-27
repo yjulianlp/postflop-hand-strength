@@ -4,12 +4,14 @@
 #include "../include/gamestate.h"
 
 int main(int argc, char* argv[]){
+	int hand_card_number;
 	if(argc<2){
-		return 1;
+		hand_card_number = 2;
+	}else{
+		hand_card_number = atoi(argv[1]);
 	}
 
 	//get card information
-	int hand_card_number = atoi(argv[1]);
 	printf("Enter the cards in your hand: (e.g. As-Jc)\n");
 	char *hand_card_input = get_cards(hand_card_number);
 
@@ -49,10 +51,12 @@ int main(int argc, char* argv[]){
 	//testing gamestates
 	GameState* flop_gamestate = malloc(sizeof(GameState));
 	initialize_gamestate(flop_gamestate, NULL, hand_cards, possible_opponent_pairs[0], hand_card_number, unused_cards, remaining_cards, table_cards, table_card_count, false);
-	print_gamestate_information(flop_gamestate);
+	//print_gamestate_information(flop_gamestate);
 	generate_sub_gamestates(flop_gamestate);
+	print_gamestate_tree(flop_gamestate);
 
 	free_gamestate(flop_gamestate);
+
 	free_card_mem(hand_cards, hand_card_number);
 	free_card_mem(table_cards, table_card_count);
 	free_card_mem(unused_cards, remaining_cards);

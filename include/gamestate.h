@@ -12,4 +12,6 @@ void free_gamestate(GameState* gamestate);
 
 void generate_sub_gamestates(GameState* root_gamestate);
 
+void print_gamestate_tree(GameState* root_gamestate);
+
 #endif

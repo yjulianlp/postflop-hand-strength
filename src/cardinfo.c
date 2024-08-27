@@ -83,10 +83,8 @@ void print_card_information(Card* card){
 }
 
 void print_cards(Card** card_container, int num_cards){
-	printf("\n+++++++++++\n");
 	for(int i = 0; i < num_cards; i++){
 		print_card_information(card_container[i]);
 	}
 	printf("|");
-	printf("\n+++++++++++\n");
 }

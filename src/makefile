@@ -2,18 +2,23 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 BUILD_FLAGS = -std=c99
 DBG_FLAGS = -std=c99 -ggdb -DDEBUG
+TEST_FLAGS = -DTESTING
 VPATH = ../include
 
-.PHONY: build debug
+.PHONY: build debug test
 
 build: CFLAGS += $(BUILD_FLAGS)
 debug: CFLAGS += $(DBG_FLAGS)
+test: CFLAGS += $(TEST_FLAGS)
 
 build: main.c processinput.o handranking.o managecards.o cardinfo.o gamestate.o
 	$(CC) $(CFLAGS) cardinfo.o managecards.o handranking.o processinput.o gamestate.o main.c -o main
 
 debug: main.c processinput.o handranking.o managecards.o cardinfo.o gamestate.o
 	$(CC) $(CFLAGS) cardinfo.o managecards.o handranking.o processinput.o gamestate.o main.c -o debug
+
+test: main.c processinput.o handranking.o managecards.o cardinfo.o gamestate.o
+	$(CC) $(CFLAGS) cardinfo.o managecards.o handranking.o processinput.o gamestate.o main.c -o test
 
 cardinfo.o: gameinfo.h cardinfo.h cardinfo.c
 	$(CC) $(CFLAGS) -c cardinfo.c -o cardinfo.o
