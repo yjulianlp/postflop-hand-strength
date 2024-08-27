@@ -25,6 +25,8 @@ void initialize_gamestate(GameState* gamestate, Card* added_card, Card** player_
 	gamestate->possible_gamestates = NULL;
 	gamestate->num_winning_sub_gamestates = 0;
 	gamestate->num_losing_sub_gamestates = 0;
+	gamestate->total_winning_sub_gamestates = 0;
+	gamestate->total_losing_sub_gamestates = 0;
 }
 void print_gamestate_information(GameState* gamestate){
 	printf("\n------PRINTING GAMESTATE-----\n");
@@ -57,8 +59,12 @@ void print_gamestate_information(GameState* gamestate){
 	printf("for the combination: ");
 	print_cards(gamestate->best_opponent_hand->cards, 5);
 	printf("\n\nThe player is currently %s.\n-------\n", (gamestate->player_win ? "winning" : "losing"));
-	printf("The current gamestate has %d possible continuation(s).\n", gamestate->num_sub_gamestates);
+	printf("The current gamestate has %d possible immediate continuation(s).\n", gamestate->num_sub_gamestates);
 	printf("From the current gamestate, %ld card continuations will result in the player winning, %ld result in the player losing.\n", gamestate->num_winning_sub_gamestates, gamestate->num_losing_sub_gamestates);
+	#ifdef DEBUG
+	printf("\nFrom the current gamestate, there are %ld total final outcomes", (gamestate->total_winning_sub_gamestates+gamestate->total_losing_sub_gamestates));
+	printf("\n%ld final outcomes result in player victory, %ld result in player defeat.\n", gamestate->total_winning_sub_gamestates, gamestate->total_losing_sub_gamestates);
+	#endif
 }
 
 void copy_gamestate(GameState* gamestate1, GameState* gamestate2){
@@ -104,6 +110,8 @@ void generate_sub_gamestates(GameState* root_gamestate){
 			root_gamestate->num_sub_gamestates = 0;
 			root_gamestate->num_winning_sub_gamestates = 0;
 			root_gamestate->num_losing_sub_gamestates = 0;
+			root_gamestate->total_winning_sub_gamestates = 0;
+			root_gamestate->total_losing_sub_gamestates = 0;
 			return;
 		}else{
 			root_gamestate->possible_gamestates = malloc(sizeof(GameState*)*root_gamestate->num_unused_cards);
@@ -112,15 +120,12 @@ void generate_sub_gamestates(GameState* root_gamestate){
 			#ifdef TESTING
 			printf("assigning values to old values of %d and %d\n\n", root_gamestate->num_unused_cards, root_gamestate->num_sub_gamestates);
 			root_gamestate->num_sub_gamestates = TESTING_GAMESTATE_COUNT;
+			root_gamestate->num_unused_cards = TESTING_GAMESTATE_COUNT;
 			printf("new vals are %d and %d\n\n", root_gamestate->num_unused_cards, root_gamestate->num_sub_gamestates);
 			#endif
 
-			#ifdef TESTING
-			for(int i = 0; i < TESTING_GAMESTATE_COUNT; i++){
-			#else
 			for(int i = 0; i < root_gamestate->num_unused_cards; i++){
-			#endif
-				
+
 				#ifdef DEBUG
 				printf("adding card: ");
 				print_card_information(root_gamestate->unused_cards[i]);
@@ -131,6 +136,8 @@ void generate_sub_gamestates(GameState* root_gamestate){
 				copy_gamestate(root_gamestate->possible_gamestates[i], root_gamestate);
 				root_gamestate->possible_gamestates[i]->num_winning_sub_gamestates = 0;
 				root_gamestate->possible_gamestates[i]->num_losing_sub_gamestates = 0;
+				root_gamestate->possible_gamestates[i]->total_losing_sub_gamestates = 0;
+				root_gamestate->possible_gamestates[i]->total_winning_sub_gamestates = 0;
 				#ifdef DEBUG
 				printf("\n\nprevious unused cards at %p with new unused cards at %p\n\n", root_gamestate->unused_cards, root_gamestate->possible_gamestates[i]->unused_cards);
 				printf("old unused cards: \n");
@@ -157,11 +164,21 @@ void generate_sub_gamestates(GameState* root_gamestate){
 				}else{
 					root_gamestate->num_losing_sub_gamestates++;
 				}
-			}
+				root_gamestate->total_losing_sub_gamestates = root_gamestate->num_losing_sub_gamestates;
+				root_gamestate->total_winning_sub_gamestates = root_gamestate->num_winning_sub_gamestates;
+			}			
 		}
 	}
 }
 
+void update_total_outcomes(GameState* root_gamestate){
+	root_gamestate->total_losing_sub_gamestates = 0;
+	root_gamestate->total_winning_sub_gamestates = 0;
+	for(int i = 0; i < root_gamestate->num_unused_cards; i++){
+		root_gamestate->total_losing_sub_gamestates+=root_gamestate->possible_gamestates[i]->num_losing_sub_gamestates;
+		root_gamestate->total_winning_sub_gamestates+=root_gamestate->possible_gamestates[i]->num_winning_sub_gamestates;
+	}
+}
 
 void print_gamestate_tree(GameState* root_gamestate){
 	print_gamestate_information(root_gamestate);

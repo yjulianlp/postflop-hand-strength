@@ -14,4 +14,6 @@ void generate_sub_gamestates(GameState* root_gamestate);
 
 void print_gamestate_tree(GameState* root_gamestate);
 
+void update_total_outcomes(GameState* root_gamestate);
+
 #endif

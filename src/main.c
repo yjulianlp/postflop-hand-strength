@@ -53,6 +53,7 @@ int main(int argc, char* argv[]){
 	initialize_gamestate(flop_gamestate, NULL, hand_cards, possible_opponent_pairs[0], hand_card_number, unused_cards, remaining_cards, table_cards, table_card_count, false);
 	//print_gamestate_information(flop_gamestate);
 	generate_sub_gamestates(flop_gamestate);
+	update_total_outcomes(flop_gamestate);
 	print_gamestate_tree(flop_gamestate);
 
 	free_gamestate(flop_gamestate);
