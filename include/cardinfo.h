@@ -6,6 +6,8 @@ bool has_same_value(Card* card1, Card* card2);
 
 int value_to_strength(char value);
 
+int card_difference(Card* card1, Card* card2);
+
 int suit_to_int(char suit);
 
 char int_to_suit(int suit);
@@ -21,5 +23,9 @@ bool is_same_card(Card* card_one, Card* card_two);
 void print_card_information(Card* card);
 
 void print_cards(Card** card_container, int num_cards);
+
+int pair_difference(Card** pair1, Card** pair2);
+
+bool is_same_pair(Card** pair1, Card** pair2);
 
 #endif

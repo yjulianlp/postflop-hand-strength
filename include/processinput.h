@@ -32,6 +32,8 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 
 int compare_cards(const void* card1, const void* card2);
 
+int compare_pairs(const void* pair1, const void* pair2);
+
 Card* get_card(void);
 
 #endif

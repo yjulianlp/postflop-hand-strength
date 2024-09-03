@@ -18,6 +18,13 @@ int main(int argc, char* argv[]){
 	//store card information
 	Card** hand_cards = process_cards(hand_card_number, hand_card_input);
 	free(hand_card_input);
+	qsort(hand_cards, 2, sizeof(Card*), compare_cards);
+
+	//get opponent hand
+	printf("Enter the cards of your opponent:");
+	char *opponent_hand_input = get_cards(hand_card_number);
+	Card** opponent_hand = process_cards(hand_card_number, opponent_hand_input);
+	free(opponent_hand_input);
 
 	printf("Enter the cards on the table: (e.g. Kc-Th-3s)");
 
@@ -42,15 +49,27 @@ int main(int argc, char* argv[]){
 	enum Hand_Ranking test_eval = evaluate_hand(cards, 5);
 	printf("hand evaluated as value %d \n", test_eval);
 
+	
 	Hand* best = get_best_hand(hand_cards, table_cards, 2, 3);
+	/*
 	printf("\nbest hand value is %d \n", best->hand_rank);
 	printf("for the combination: \n");
 	print_cards(best->cards, best->num_cards);
 	printf("\n");
+*/
+	qsort(possible_opponent_pairs, opponent_pair_count, sizeof(Card**), compare_pairs);
+	for(int i = 0; i < opponent_pair_count; i++){
+		print_cards(possible_opponent_pairs[i], 2);
+	}
 
+
+	//find opponent pair position
+	qsort(opponent_hand, 2, sizeof(Card*), compare_cards);
+	int opponent_pair_position = find_pair(possible_opponent_pairs, opponent_hand, opponent_pair_count);
+	printf("\n");
 	//testing gamestates
 	GameState* flop_gamestate = malloc(sizeof(GameState));
-	initialize_gamestate(flop_gamestate, NULL, hand_cards, possible_opponent_pairs[0], hand_card_number, unused_cards, remaining_cards, table_cards, table_card_count, false);
+	initialize_gamestate(flop_gamestate, NULL, hand_cards, possible_opponent_pairs[opponent_pair_position], hand_card_number, unused_cards, remaining_cards, table_cards, table_card_count, false);
 	//print_gamestate_information(flop_gamestate);
 	generate_sub_gamestates(flop_gamestate);
 	update_total_outcomes(flop_gamestate);
@@ -59,6 +78,7 @@ int main(int argc, char* argv[]){
 	free_gamestate(flop_gamestate);
 
 	free_card_mem(hand_cards, hand_card_number);
+	free_card_mem(opponent_hand, hand_card_number);
 	free_card_mem(table_cards, table_card_count);
 	free_card_mem(unused_cards, remaining_cards);
 	for(int i = 0; i < opponent_pair_count; i++){

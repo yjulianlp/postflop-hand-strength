@@ -342,3 +342,14 @@ int compare_cards(const void* card1, const void* card2){
 
 	return card1_str-card2_str;
 }
+
+int compare_pairs(const void* pair1, const void* pair2){
+	Card** hand1 = (*(Card***)pair1);
+	Card** hand2 = (*(Card***)pair2);
+	int card_diff = card_difference(hand1[0], hand2[0]);
+	if(card_diff == 0){
+		card_diff = card_difference(hand1[1], hand2[1]);
+	}
+
+	return card_diff;
+}

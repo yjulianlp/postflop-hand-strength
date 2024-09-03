@@ -28,6 +28,7 @@ void initialize_gamestate(GameState* gamestate, Card* added_card, Card** player_
 	gamestate->total_winning_sub_gamestates = 0;
 	gamestate->total_losing_sub_gamestates = 0;
 }
+
 void print_gamestate_information(GameState* gamestate){
 	printf("\n------PRINTING GAMESTATE-----\n");
 	if(gamestate->added_card){
@@ -60,7 +61,7 @@ void print_gamestate_information(GameState* gamestate){
 	print_cards(gamestate->best_opponent_hand->cards, 5);
 	printf("\n\nThe player is currently %s.\n-------\n", (gamestate->player_win ? "winning" : "losing"));
 	printf("The current gamestate has %d possible immediate continuation(s).\n", gamestate->num_sub_gamestates);
-	printf("From the current gamestate, %ld card continuations will result in the player winning, %ld result in the player losing.\n", gamestate->num_winning_sub_gamestates, gamestate->num_losing_sub_gamestates);
+	printf("%ld continuations will result in the player winning, %ld result in the player losing.\n", gamestate->num_winning_sub_gamestates, gamestate->num_losing_sub_gamestates);
 	#ifdef DEBUG
 	printf("\nFrom the current gamestate, there are %ld total final outcomes", (gamestate->total_winning_sub_gamestates+gamestate->total_losing_sub_gamestates));
 	printf("\n%ld final outcomes result in player victory, %ld result in player defeat.\n", gamestate->total_winning_sub_gamestates, gamestate->total_losing_sub_gamestates);

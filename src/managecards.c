@@ -9,10 +9,41 @@ int find_card(Card** sorted_card_container, Card* card, int container_size){
 		if(is_same_card(sorted_card_container[middle], card)){
 			return middle;
 		}else{
-			int difference = value_difference(sorted_card_container[middle], card);
+			int difference = card_difference(sorted_card_container[middle], card);
+			/*
+			value_difference(sorted_card_container[middle], card);
 			if(difference == 0){ //correct value but wrong suit
 				difference = suit_difference(sorted_card_container[middle], card);
+			}*/
+			
+			if(difference > 0){ 
+				//card has a larger value
+				high = middle-1;
+			}else{ 
+				//card has a smaller value
+				low = middle+1;
 			}
+		}
+	}
+
+	return -1; //not found
+}
+
+int find_pair(Card*** sorted_pair_container, Card** pair, int container_size){
+	//pair must be sorted order
+	
+	int low = 0, high = container_size-1;
+	while(low <= high){
+		int middle = (low+high)/2;
+		if(is_same_pair(sorted_pair_container[middle], pair)){
+			return middle;
+		}else{
+			int difference = pair_difference(sorted_pair_container[middle], pair);
+			/*
+			value_difference(sorted_card_container[middle], card);
+			if(difference == 0){ //correct value but wrong suit
+				difference = suit_difference(sorted_card_container[middle], card);
+			}*/
 			
 			if(difference > 0){ 
 				//card has a larger value

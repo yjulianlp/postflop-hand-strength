@@ -10,8 +10,32 @@ int suit_difference(Card* card1, Card* card2){
 	return (card1->type - card2->type);
 }
 
+int card_difference(Card* card1, Card* card2){
+	//positive if card1 > card2
+	int difference = value_difference(card1, card2);
+
+	if(difference == 0){
+		difference = suit_difference(card1, card2);
+	}
+
+	return difference;
+}
+
+int pair_difference(Card** pair1, Card** pair2){
+	int difference = card_difference(pair1[0], pair2[0]);
+	if(difference==0){
+		difference = card_difference(pair1[1], pair2[1]);
+	}
+
+	return difference;
+}
+
 bool is_same_card(Card* card_one, Card* card_two){
 	return ((card_one->value == card_two->value) && (card_one->type == card_two->type)) ? true : false;
+}
+
+bool is_same_pair(Card** pair1, Card** pair2){
+	return (is_same_card(pair1[0], pair2[0]) && is_same_card(pair1[1], pair2[1]));
 }
 
 bool has_same_value(Card* card1, Card* card2){
