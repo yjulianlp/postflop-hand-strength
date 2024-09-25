@@ -4,6 +4,9 @@
 #define DECK_SIZE 52
 #define CARD_VALUE_RANGE 13
 #define SUIT_RANGE 4
+#define NUM_HAND_CARDS 2
+#define NUM_TABLE_CARDS 3
+#define COMBINATION_SIZE 5
 
 #include <stdio.h>
 #include <string.h>

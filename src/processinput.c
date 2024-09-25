@@ -1,6 +1,7 @@
 #include "../include/processinput.h"
 #include "../include/handranking.h"
 #include "../include/cardinfo.h"
+#include "../include/gameinfo.h"
 #include <string.h>
 
 char* get_cards(int card_count){
@@ -127,8 +128,8 @@ Combinations* generate_hand_combinations(Card** cards, int num_cards){
 	combos->num_combinations = num_possible_combinations;
 
 	if(num_cards == 5){
-		combos->combinations[0] = malloc(sizeof(Card*)*5);
-		memcpy(combos->combinations[0], cards, sizeof(Card*)*5);
+		combos->combinations[0] = malloc(sizeof(Card*)*COMBINATION_SIZE);
+		memcpy(combos->combinations[0], cards, sizeof(Card*)*COMBINATION_SIZE);
 		//possible_combinations[0] = cards;
 
 		return combos;
@@ -136,7 +137,7 @@ Combinations* generate_hand_combinations(Card** cards, int num_cards){
 
 	if(num_cards == 6){
 		for(int i = 0; i < num_cards; i++){
-			combos->combinations[combination_count] = malloc(sizeof(Card*)*5);
+			combos->combinations[combination_count] = malloc(sizeof(Card*)*COMBINATION_SIZE);
 
 			//cards before currently selected card
 			memcpy(combos->combinations[combination_count], cards, sizeof(Card*)*i);
@@ -153,7 +154,7 @@ Combinations* generate_hand_combinations(Card** cards, int num_cards){
 	for(int i = 0; i < num_cards; i++){
 		for(int j = i+1; j < num_cards; j++){
 
-			combos->combinations[combination_count] = malloc(sizeof(Card*)*5);
+			combos->combinations[combination_count] = malloc(sizeof(Card*)*COMBINATION_SIZE);
 			int before_cards = i, between_cards = j-(i+1), after_cards = num_cards-(j+1);
 			//cards before the first selected card
 			memcpy(combos->combinations[combination_count], cards, sizeof(Card*)*before_cards);
@@ -187,7 +188,7 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 	Card** strongest_combination = NULL;
 
 	for(int i = 0; i < combos->num_combinations; i++){
-		enum Hand_Ranking temp_strength = evaluate_hand(combos->combinations[i], 5);
+		enum Hand_Ranking temp_strength = evaluate_hand(combos->combinations[i], COMBINATION_SIZE);
 		if(temp_strength > strongest_combination_ranking){
 			strongest_combination_ranking = temp_strength;
 			strongest_combination = combos->combinations[i];
@@ -195,7 +196,7 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 			if(temp_strength == strongest_combination_ranking){
 				//tiebreaker
 				if(strongest_combination){
-					int tiebreak =  tiebreaker(combos->combinations[i], strongest_combination, 5, strongest_combination_ranking);
+					int tiebreak =  tiebreaker(combos->combinations[i], strongest_combination, COMBINATION_SIZE, strongest_combination_ranking);
 					if(tiebreak > 0){
 						
 						strongest_combination = combos->combinations[i];
@@ -213,9 +214,9 @@ Hand* get_best_hand(Card** hand_cards, Card** table_cards, int num_hand_cards, i
 	
 
 	Hand* best_hand = malloc(sizeof(Hand));
-	best_hand->cards = malloc(sizeof(Card*)*5);
-	memcpy(best_hand->cards, strongest_combination, sizeof(Card*)*5);
-	best_hand->num_cards = 5;
+	best_hand->cards = malloc(sizeof(Card*)*COMBINATION_SIZE);
+	memcpy(best_hand->cards, strongest_combination, sizeof(Card*)*COMBINATION_SIZE);
+	best_hand->num_cards = COMBINATION_SIZE;
 	best_hand->hand_rank = strongest_combination_ranking;
 	free_combo_struct(combos, combos->num_combinations);
 	return best_hand;

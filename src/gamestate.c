@@ -54,11 +54,11 @@ void print_gamestate_information(GameState* gamestate){
 
 	printf("\nbest player hand value is %d", gamestate->best_player_hand->hand_rank);
 	printf(" for the combination: ");
-	print_cards(gamestate->best_player_hand->cards, 5);
+	print_cards(gamestate->best_player_hand->cards, COMBINATION_SIZE);
 	printf("\n");
 	printf("\nbest opponent hand value is %d ", gamestate->best_opponent_hand->hand_rank);
 	printf("for the combination: ");
-	print_cards(gamestate->best_opponent_hand->cards, 5);
+	print_cards(gamestate->best_opponent_hand->cards, COMBINATION_SIZE);
 	printf("\n\nThe player is currently %s.\n-------\n", (gamestate->player_win ? "winning" : "losing"));
 	printf("The current gamestate has %d possible immediate continuation(s).\n", gamestate->num_sub_gamestates);
 	printf("%ld continuations will result in the player winning, %ld result in the player losing.\n", gamestate->num_winning_sub_gamestates, gamestate->num_losing_sub_gamestates);
@@ -69,24 +69,11 @@ void print_gamestate_information(GameState* gamestate){
 }
 
 void copy_gamestate(GameState* gamestate1, GameState* gamestate2){
-	gamestate1->added_card = gamestate2->added_card;
-	gamestate1->player_hand = gamestate2->player_hand;
-	gamestate1->opponent_hand = gamestate2->opponent_hand;
-	gamestate1->num_hand_cards = gamestate2->num_hand_cards;
+	memcpy(gamestate1, gamestate2, sizeof(GameState));
 	gamestate1->unused_cards = malloc(sizeof(Card*)*gamestate2->num_unused_cards);
 	memcpy(gamestate1->unused_cards, gamestate2->unused_cards, sizeof(Card*)*gamestate2->num_unused_cards);
-	gamestate1->num_unused_cards = gamestate2->num_unused_cards;
-
 	gamestate1->table_cards = malloc(sizeof(Card*)*gamestate2->num_table_cards);
 	memcpy(gamestate1->table_cards, gamestate2->table_cards, sizeof(Card*)*gamestate2->num_table_cards);
-	gamestate1->num_table_cards = gamestate2->num_table_cards;
-
-	gamestate1->best_player_hand = gamestate2->best_player_hand;
-	gamestate1->best_opponent_hand = gamestate2->best_opponent_hand;
-	gamestate1->player_win = gamestate2->player_win;
-	gamestate1->game_over = gamestate2->game_over;
-	gamestate1->possible_gamestates = gamestate2->possible_gamestates;
-	gamestate1->num_sub_gamestates = gamestate2->num_sub_gamestates;
 }
 
 void free_gamestate(GameState* gamestate){

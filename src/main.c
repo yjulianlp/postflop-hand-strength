@@ -3,54 +3,46 @@
 #include "../include/cardinfo.h"
 #include "../include/gamestate.h"
 
-int main(int argc, char* argv[]){
-	int hand_card_number;
-	if(argc<2){
-		hand_card_number = 2;
-	}else{
-		hand_card_number = atoi(argv[1]);
-	}
+int main(void){
 
 	//get card information
 	printf("Enter the cards in your hand: (e.g. As-Jc)\n");
-	char *hand_card_input = get_cards(hand_card_number);
+	char *hand_card_input = get_cards(NUM_HAND_CARDS);
 
 	//store card information
-	Card** hand_cards = process_cards(hand_card_number, hand_card_input);
+	Card** hand_cards = process_cards(NUM_HAND_CARDS, hand_card_input);
 	free(hand_card_input);
-	qsort(hand_cards, 2, sizeof(Card*), compare_cards);
+	qsort(hand_cards, NUM_HAND_CARDS, sizeof(Card*), compare_cards);
 
 	//get opponent hand
 	printf("Enter the cards of your opponent:");
-	char *opponent_hand_input = get_cards(hand_card_number);
-	Card** opponent_hand = process_cards(hand_card_number, opponent_hand_input);
+	char *opponent_hand_input = get_cards(NUM_HAND_CARDS);
+	Card** opponent_hand = process_cards(NUM_HAND_CARDS, opponent_hand_input);
 	free(opponent_hand_input);
 
 	printf("Enter the cards on the table: (e.g. Kc-Th-3s)");
 
-	int table_card_count = 3;
-	char *table_card_input = get_cards(table_card_count);
-	Card** table_cards = process_cards(table_card_count, table_card_input);
+	char *table_card_input = get_cards(NUM_TABLE_CARDS);
+	Card** table_cards = process_cards(NUM_TABLE_CARDS, table_card_input);
 	free(table_card_input);
 
 	//cards not in hand and not on table
-	int remaining_cards = DECK_SIZE-hand_card_number-table_card_count;
+	int remaining_cards = DECK_SIZE-NUM_HAND_CARDS-NUM_TABLE_CARDS;
 	Card** unused_cards = malloc(sizeof(Card*)*remaining_cards); 
 
-	unused_cards = setup_unused_cards(unused_cards, remaining_cards, hand_cards, table_cards, hand_card_number, table_card_count);
+	unused_cards = setup_unused_cards(unused_cards, remaining_cards, hand_cards, table_cards, NUM_HAND_CARDS, NUM_TABLE_CARDS);
 	qsort(unused_cards, remaining_cards, sizeof(Card*), compare_cards);
 
 	int opponent_pair_count = 0;
-	Card*** possible_opponent_pairs = NULL;
-	possible_opponent_pairs = generate_possible_pairs(unused_cards, remaining_cards, &opponent_pair_count);
+	Card*** possible_opponent_pairs = generate_possible_pairs(unused_cards, remaining_cards, &opponent_pair_count);
 
-	Card** cards = concat_card_arrays(hand_cards, table_cards, 2, 3);
-	qsort(cards, 5, sizeof(Card*), compare_cards);
-	enum Hand_Ranking test_eval = evaluate_hand(cards, 5);
+	Card** cards = concat_card_arrays(hand_cards, table_cards, NUM_HAND_CARDS, NUM_TABLE_CARDS);
+	qsort(cards, COMBINATION_SIZE, sizeof(Card*), compare_cards);
+	enum Hand_Ranking test_eval = evaluate_hand(cards, COMBINATION_SIZE);
 	printf("hand evaluated as value %d \n", test_eval);
 
 	
-	Hand* best = get_best_hand(hand_cards, table_cards, 2, 3);
+	Hand* best = get_best_hand(hand_cards, table_cards, NUM_HAND_CARDS, NUM_TABLE_CARDS);
 	/*
 	printf("\nbest hand value is %d \n", best->hand_rank);
 	printf("for the combination: \n");
@@ -59,17 +51,17 @@ int main(int argc, char* argv[]){
 */
 	qsort(possible_opponent_pairs, opponent_pair_count, sizeof(Card**), compare_pairs);
 	for(int i = 0; i < opponent_pair_count; i++){
-		print_cards(possible_opponent_pairs[i], 2);
+		print_cards(possible_opponent_pairs[i], NUM_HAND_CARDS);
 	}
 
 
 	//find opponent pair position
-	qsort(opponent_hand, 2, sizeof(Card*), compare_cards);
+	qsort(opponent_hand, NUM_HAND_CARDS, sizeof(Card*), compare_cards);
 	int opponent_pair_position = find_pair(possible_opponent_pairs, opponent_hand, opponent_pair_count);
 	printf("\n");
 	//testing gamestates
 	GameState* flop_gamestate = malloc(sizeof(GameState));
-	initialize_gamestate(flop_gamestate, NULL, hand_cards, possible_opponent_pairs[opponent_pair_position], hand_card_number, unused_cards, remaining_cards, table_cards, table_card_count, false);
+	initialize_gamestate(flop_gamestate, NULL, hand_cards, possible_opponent_pairs[opponent_pair_position], NUM_HAND_CARDS, unused_cards, remaining_cards, table_cards, NUM_TABLE_CARDS, false);
 	//print_gamestate_information(flop_gamestate);
 	generate_sub_gamestates(flop_gamestate);
 	update_total_outcomes(flop_gamestate);
@@ -77,9 +69,9 @@ int main(int argc, char* argv[]){
 
 	free_gamestate(flop_gamestate);
 
-	free_card_mem(hand_cards, hand_card_number);
-	free_card_mem(opponent_hand, hand_card_number);
-	free_card_mem(table_cards, table_card_count);
+	free_card_mem(hand_cards, NUM_HAND_CARDS);
+	free_card_mem(opponent_hand, NUM_HAND_CARDS);
+	free_card_mem(table_cards, NUM_TABLE_CARDS);
 	free_card_mem(unused_cards, remaining_cards);
 	for(int i = 0; i < opponent_pair_count; i++){
 		free(possible_opponent_pairs[i]);
