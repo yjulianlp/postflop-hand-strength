@@ -50,9 +50,10 @@ int main(void){
 	printf("\n");
 */
 	qsort(possible_opponent_pairs, opponent_pair_count, sizeof(Card**), compare_pairs);
+	/*
 	for(int i = 0; i < opponent_pair_count; i++){
 		print_cards(possible_opponent_pairs[i], NUM_HAND_CARDS);
-	}
+	}*/
 
 
 	//find opponent pair position
@@ -65,7 +66,8 @@ int main(void){
 	//print_gamestate_information(flop_gamestate);
 	generate_sub_gamestates(flop_gamestate);
 	update_total_outcomes(flop_gamestate);
-	print_gamestate_tree(flop_gamestate);
+	explore_gamestate(flop_gamestate);
+	//print_gamestate_tree(flop_gamestate);
 
 	free_gamestate(flop_gamestate);
 

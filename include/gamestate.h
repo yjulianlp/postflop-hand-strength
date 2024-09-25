@@ -16,4 +16,8 @@ void print_gamestate_tree(GameState* root_gamestate);
 
 void update_total_outcomes(GameState* root_gamestate);
 
+int find_gamestate(GameState** possible_gamestates, int num_possible_gamestates, Card* new_card);
+
+void explore_gamestate(GameState* gamestate);
+
 #endif

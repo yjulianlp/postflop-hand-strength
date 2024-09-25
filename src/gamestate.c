@@ -4,6 +4,70 @@
 #include "../include/cardinfo.h"
 #define TESTING_GAMESTATE_COUNT 2
 
+int find_gamestate(GameState** possible_gamestates, int num_possible_gamestates, Card* new_card){
+	//returns index of the gamestate in possible_gamestates where new_card was the most recently added card
+
+	int low = 0, high = num_possible_gamestates-1;
+	while(low <= high){
+		int middle = (low+high)/2;
+		if(is_same_card(possible_gamestates[middle]->added_card, new_card)){
+			return middle;
+		}else{
+			int difference = card_difference(possible_gamestates[middle]->added_card, new_card);
+			if(difference > 0){ 
+				high = middle-1;
+			}else{ 
+				low = middle+1;
+			}
+		}
+	}
+
+	return -1;
+}
+
+void explore_gamestate(GameState* gamestate){
+	GameState* current = gamestate;
+	int continuation_index;
+
+	print_gamestate_information(current);
+	printf("\nNavigating Gamestate Tree. Input a card to go to a continuation gamestate, \"-1\" to go to the parent gamestate, and \"0\" to exit: ");
+
+	char* card_str = get_cards(1);
+
+	#ifdef DEBUG
+	printf("read in: %s\n", card_str);
+	#endif
+	while (!(strncmp(card_str, "0", 1)==0)){
+		if(strncmp(card_str, "-1", 2) == 0){
+			if(current->parent_gamestate != NULL){
+				current = current->parent_gamestate;
+			}else{
+				printf("\nparent gamestate does not exist\n");
+			}
+		}else{
+			if(current->possible_gamestates != NULL){
+				Card** next_card = process_cards(1, card_str);
+				continuation_index = find_gamestate(current->possible_gamestates, current->num_sub_gamestates, next_card[0]);
+				if(continuation_index!=-1){
+					current = current->possible_gamestates[continuation_index];
+				}else{
+					printf("Not a valid continuation.\n");
+				}
+				free(next_card);
+			}else{
+				printf("\nNo continuations from current gamestate. Input -1 to go to parent gamestate or 0 to exit.\n\n");
+			}
+
+		}
+
+		print_gamestate_information(current);
+		printf("Next Action: ");
+		card_str = get_cards(1);
+	}
+	printf("ending navigation.\n");
+	free(card_str);
+}
+
 void initialize_gamestate(GameState* gamestate, Card* added_card, Card** player_hand, Card** opponent_hand, int hand_card_count, Card** unused_cards, int unused_card_count, Card** table_cards, int table_card_count, bool is_gameover){
 	gamestate->game_over = is_gameover;
 	gamestate->added_card = added_card;
@@ -27,6 +91,7 @@ void initialize_gamestate(GameState* gamestate, Card* added_card, Card** player_
 	gamestate->num_losing_sub_gamestates = 0;
 	gamestate->total_winning_sub_gamestates = 0;
 	gamestate->total_losing_sub_gamestates = 0;
+	gamestate->parent_gamestate = NULL;
 }
 
 void print_gamestate_information(GameState* gamestate){
@@ -61,10 +126,10 @@ void print_gamestate_information(GameState* gamestate){
 	print_cards(gamestate->best_opponent_hand->cards, COMBINATION_SIZE);
 	printf("\n\nThe player is currently %s.\n-------\n", (gamestate->player_win ? "winning" : "losing"));
 	printf("The current gamestate has %d possible immediate continuation(s).\n", gamestate->num_sub_gamestates);
-	printf("%ld continuations will result in the player winning, %ld result in the player losing.\n", gamestate->num_winning_sub_gamestates, gamestate->num_losing_sub_gamestates);
+	printf("%d continuations will result in the player winning, %d result in the player losing.\n", gamestate->num_winning_sub_gamestates, gamestate->num_losing_sub_gamestates);
 	#ifdef DEBUG
-	printf("\nFrom the current gamestate, there are %ld total final outcomes", (gamestate->total_winning_sub_gamestates+gamestate->total_losing_sub_gamestates));
-	printf("\n%ld final outcomes result in player victory, %ld result in player defeat.\n", gamestate->total_winning_sub_gamestates, gamestate->total_losing_sub_gamestates);
+	printf("\nFrom the current gamestate, there are %d total final outcomes", (gamestate->total_winning_sub_gamestates+gamestate->total_losing_sub_gamestates));
+	printf("\n%d final outcomes result in player victory, %d result in player defeat.\n", gamestate->total_winning_sub_gamestates, gamestate->total_losing_sub_gamestates);
 	#endif
 }
 
@@ -145,6 +210,7 @@ void generate_sub_gamestates(GameState* root_gamestate){
 				root_gamestate->possible_gamestates[i]->best_player_hand = get_best_hand(root_gamestate->possible_gamestates[i]->player_hand, root_gamestate->possible_gamestates[i]->table_cards, root_gamestate->possible_gamestates[i]->num_hand_cards, root_gamestate->possible_gamestates[i]->num_table_cards);
 				root_gamestate->possible_gamestates[i]->best_opponent_hand = get_best_hand(root_gamestate->possible_gamestates[i]->opponent_hand, root_gamestate->possible_gamestates[i]->table_cards, root_gamestate->possible_gamestates[i]->num_hand_cards, root_gamestate->possible_gamestates[i]->num_table_cards);
 				root_gamestate->possible_gamestates[i]->player_win = (is_winning_hand(root_gamestate->possible_gamestates[i]->best_player_hand, root_gamestate->possible_gamestates[i]->best_opponent_hand) ? true : false);
+				root_gamestate->possible_gamestates[i]->parent_gamestate = root_gamestate;
 				generate_sub_gamestates(root_gamestate->possible_gamestates[i]);
 
 				if((root_gamestate->possible_gamestates[i]->player_win)){

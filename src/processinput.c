@@ -123,7 +123,7 @@ Combinations* generate_hand_combinations(Card** cards, int num_cards){
 
 	int num_possible_combinations = (num_cards == 5) ? 1 : ((num_cards == 6) ? 6 : 21); // 5 choose 5, 6 choose 5, 7 choose 5;
 
-	Combinations* combos = malloc(sizeof(struct Combinations));
+	Combinations* combos = malloc(sizeof(Combinations));
 	combos->combinations = malloc(sizeof(Card**)*num_possible_combinations);
 	combos->num_combinations = num_possible_combinations;
 

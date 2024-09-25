@@ -65,10 +65,11 @@ typedef struct GameState{
 	bool game_over;
 	struct GameState** possible_gamestates;
 	int num_sub_gamestates;
-	long num_winning_sub_gamestates;
-	long num_losing_sub_gamestates;
-	long total_winning_sub_gamestates;
-	long total_losing_sub_gamestates;
+	int num_winning_sub_gamestates;
+	int num_losing_sub_gamestates;
+	int total_winning_sub_gamestates;
+	int total_losing_sub_gamestates;
+	struct GameState* parent_gamestate;
 } GameState;
 
 #endif
