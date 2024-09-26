@@ -6,7 +6,7 @@
 int main(void){
 
 	//get card information
-	printf("Enter the cards in your hand (e.g. As-Jc): \n");
+	printf("Enter the cards in your hand (e.g. As-Jc): ");
 	char *hand_card_input = get_cards(NUM_HAND_CARDS);
 
 	//store card information

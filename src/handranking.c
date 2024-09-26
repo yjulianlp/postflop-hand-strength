@@ -184,11 +184,13 @@ int find_pairs(Card** cards, int num_cards){
 int tiebreak_two_pair(Card** hand1, Card** hand2, int num_cards){
 	Card* hand1_pairs[2] = {NULL, NULL};
 	Card* hand2_pairs[2] = {NULL, NULL};
-	int i = 0, index = 0;
+	int i = 0, index = 0, lone_card_index[2] = {0,0};
 	while(i < num_cards-1){
 		if(has_same_value(hand1[i], hand1[i+1])){
 			hand1_pairs[index]=hand1[i];
 			index++, i++;
+		}else{
+			lone_card_index[0] = i;
 		}
 		i++;
 	}
@@ -197,6 +199,8 @@ int tiebreak_two_pair(Card** hand1, Card** hand2, int num_cards){
 		if(has_same_value(hand2[i], hand2[i+1])){
 			hand2_pairs[index]=hand2[i];
 			index++, i++;
+		}else{
+			lone_card_index[1] = i;
 		}
 		i++;
 	}
@@ -218,21 +222,50 @@ int tiebreak_two_pair(Card** hand1, Card** hand2, int num_cards){
 	}else{
 		difference = value_difference(hand1_pairs[hand1_bottom], hand2_pairs[hand2_bottom]);
 	}
+	if(difference != 0){
+		return difference;
+	}else{
+		difference = value_difference(hand1[lone_card_index[0]], hand2[lone_card_index[1]]);
+	}
 
+	#ifdef DEBUG
+	printf("found lone card diff of %d\n", difference);
+	#endif
+	
 	return difference;
 }
 
 int tiebreak_one_pair(Card** hand1, Card** hand2, int num_cards){
 	Card* hand1_pair_card = NULL, *hand2_pair_card = NULL;
+	Card** hand1_unused = malloc(sizeof(Card*)*3);
+	Card** hand2_unused = malloc(sizeof(Card*)*3);
+	int hand1_unused_index = 0, hand2_unused_index=0;
 	for(int i = 0; i < num_cards-1; i++){
 		if(has_same_value(hand1[i], hand1[i+1])){
 			hand1_pair_card = hand1[i];
+		}else{
+			hand1_unused[hand1_unused_index] = hand1[i];
+			hand1_unused_index++;
 		}
 		if(has_same_value(hand2[i], hand2[i+1])){
 			hand2_pair_card = hand2[i];
+		}else{
+			hand2_unused[hand2_unused_index] = hand2[i];
+			hand2_unused_index++;
 		}
 	}
-	return value_difference(hand1_pair_card, hand2_pair_card);
+	int difference = value_difference(hand1_pair_card, hand2_pair_card);
+
+	if(difference != 0){
+		free(hand1_unused);
+		free(hand2_unused);
+		return difference;
+	}else{
+		difference = tiebreak_highcard(hand1_unused, hand2_unused, 3);
+	}
+	free(hand1_unused);
+	free(hand2_unused);
+	return difference;
 }
 
 int tiebreak_highcard(Card** hand1, Card** hand2, int num_cards){
