@@ -86,7 +86,6 @@ void free_card_mem(Card** card_container, int num_cards){
 }
 
 Card*** generate_possible_pairs(Card** possible_cards, int num_possible_cards, int* pair_count){
-	printf("generating pairs\n");
 	Card*** temp_container = NULL;
 	for(int i = 0; i < num_possible_cards; i++){
 		for(int j = i+1; j < num_possible_cards; j++){

@@ -27,6 +27,7 @@ int find_gamestate(GameState** possible_gamestates, int num_possible_gamestates,
 
 void explore_gamestate(GameState* gamestate){
 	GameState* current = gamestate;
+	Card** next_card;
 	int continuation_index;
 
 	print_gamestate_information(current);
@@ -37,6 +38,7 @@ void explore_gamestate(GameState* gamestate){
 	#ifdef DEBUG
 	printf("read in: %s\n", card_str);
 	#endif
+
 	while (!(strncmp(card_str, "0", 1)==0)){
 		if(strncmp(card_str, "-1", 2) == 0){
 			if(current->parent_gamestate != NULL){
@@ -46,26 +48,27 @@ void explore_gamestate(GameState* gamestate){
 			}
 		}else{
 			if(current->possible_gamestates != NULL){
-				Card** next_card = process_cards(1, card_str);
+				next_card = process_cards(1, card_str);
 				continuation_index = find_gamestate(current->possible_gamestates, current->num_sub_gamestates, next_card[0]);
+				free_card_mem(next_card, 1);
 				if(continuation_index!=-1){
 					current = current->possible_gamestates[continuation_index];
 				}else{
 					printf("Not a valid continuation.\n");
 				}
-				free(next_card);
+				
 			}else{
 				printf("\nNo continuations from current gamestate. Input -1 to go to parent gamestate or 0 to exit.\n\n");
 			}
 
 		}
-
 		print_gamestate_information(current);
 		printf("Next Action: ");
+		free(card_str);
 		card_str = get_cards(1);
 	}
-	printf("ending navigation.\n");
 	free(card_str);
+	printf("ending navigation.\n");
 }
 
 void initialize_gamestate(GameState* gamestate, Card* added_card, Card** player_hand, Card** opponent_hand, int hand_card_count, Card** unused_cards, int unused_card_count, Card** table_cards, int table_card_count, bool is_gameover){
@@ -95,9 +98,9 @@ void initialize_gamestate(GameState* gamestate, Card* added_card, Card** player_
 }
 
 void print_gamestate_information(GameState* gamestate){
-	printf("\n------PRINTING GAMESTATE-----\n");
+	printf("\n------------------------\n");
 	if(gamestate->added_card){
-		printf("most recent card added was: ");
+		printf("most recent card added: ");
 		print_card_information(gamestate->added_card);
 		printf("|");
 	}
@@ -108,14 +111,10 @@ void print_gamestate_information(GameState* gamestate){
 	#ifdef DEBUG
 	printf("\nThe %d currently unused cards are:\n", gamestate->num_unused_cards);
 	print_cards(gamestate->unused_cards, gamestate->num_unused_cards);
+	#endif
 	printf("\nTable cards are: ");
 	print_cards(gamestate->table_cards, gamestate->num_table_cards);
 	printf("\n-------\n");
-	#else
-	printf("\nTable cards are: ");
-	print_cards(gamestate->table_cards, gamestate->num_table_cards);
-	printf("\nThere are %d unused cards\n", gamestate->num_unused_cards);
-	#endif
 
 	printf("\nbest player hand value is %d", gamestate->best_player_hand->hand_rank);
 	printf(" for the combination: ");
@@ -124,13 +123,15 @@ void print_gamestate_information(GameState* gamestate){
 	printf("\nbest opponent hand value is %d ", gamestate->best_opponent_hand->hand_rank);
 	printf("for the combination: ");
 	print_cards(gamestate->best_opponent_hand->cards, COMBINATION_SIZE);
-	printf("\n\nThe player is currently %s.\n-------\n", (gamestate->player_win ? "winning" : "losing"));
-	printf("The current gamestate has %d possible immediate continuation(s).\n", gamestate->num_sub_gamestates);
-	printf("%d continuations will result in the player winning, %d result in the player losing.\n", gamestate->num_winning_sub_gamestates, gamestate->num_losing_sub_gamestates);
-	#ifdef DEBUG
-	printf("\nFrom the current gamestate, there are %d total final outcomes", (gamestate->total_winning_sub_gamestates+gamestate->total_losing_sub_gamestates));
-	printf("\n%d final outcomes result in player victory, %d result in player defeat.\n", gamestate->total_winning_sub_gamestates, gamestate->total_losing_sub_gamestates);
-	#endif
+	printf("\n\nThe player is currently %s.\n-------\n", (gamestate->player_win ? "winning" : "not winning"));
+	
+	if(gamestate->num_sub_gamestates>0){
+		printf("The current gamestate has %d possible immediate continuation(s).\n", gamestate->num_sub_gamestates);
+		printf("%d continuations will result in the player winning, %d result in the player not winning (draw or loss).\n", gamestate->num_winning_sub_gamestates, gamestate->num_losing_sub_gamestates);
+		printf("\nFrom the current gamestate, there are %d total final outcomes", (gamestate->total_winning_sub_gamestates+gamestate->total_losing_sub_gamestates));
+		printf("\n%d final outcomes result in player victory, %d result in player defeat or a draw.\n", gamestate->total_winning_sub_gamestates, gamestate->total_losing_sub_gamestates);
+	}
+
 }
 
 void copy_gamestate(GameState* gamestate1, GameState* gamestate2){

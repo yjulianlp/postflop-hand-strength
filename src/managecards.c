@@ -10,11 +10,6 @@ int find_card(Card** sorted_card_container, Card* card, int container_size){
 			return middle;
 		}else{
 			int difference = card_difference(sorted_card_container[middle], card);
-			/*
-			value_difference(sorted_card_container[middle], card);
-			if(difference == 0){ //correct value but wrong suit
-				difference = suit_difference(sorted_card_container[middle], card);
-			}*/
 			
 			if(difference > 0){ 
 				//card has a larger value
@@ -39,11 +34,6 @@ int find_pair(Card*** sorted_pair_container, Card** pair, int container_size){
 			return middle;
 		}else{
 			int difference = pair_difference(sorted_pair_container[middle], pair);
-			/*
-			value_difference(sorted_card_container[middle], card);
-			if(difference == 0){ //correct value but wrong suit
-				difference = suit_difference(sorted_card_container[middle], card);
-			}*/
 			
 			if(difference > 0){ 
 				//card has a larger value
