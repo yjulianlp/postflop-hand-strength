@@ -187,12 +187,18 @@ int tiebreak_set(Card** hand1, Card** hand2, int num_cards){
 	}
 
 	int difference = value_difference(hand1_set_card, hand2_set_card);
+	
 	if(difference!=0){
+		free(hand1_unused);
+		free(hand2_unused);
 		return difference;
 	}else{
 		difference = tiebreak_highcard(hand1_unused, hand2_unused, 2);
 	}
-	
+
+	free(hand1_unused);
+	free(hand2_unused);
+
 	return difference;
 }
 
