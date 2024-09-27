@@ -144,20 +144,56 @@ bool is_set(Card** cards, int num_cards){
 int tiebreak_set(Card** hand1, Card** hand2, int num_cards){
 	Card* hand1_set_card = NULL;
 	Card* hand2_set_card = NULL;
+	Card** hand1_unused = malloc(sizeof(Card*)*2);
+	Card** hand2_unused = malloc(sizeof(Card*)*2);
+
 	for(int i = 0; i < num_cards-2; i++){
 		if(has_same_value(hand1[i], hand1[i+2])){
 			hand1_set_card = hand1[i];
+			switch(i){
+			case 0:
+				hand1_unused[0] = hand1[3];
+				hand1_unused[1] = hand1[4];
+				break;
+			case 1:
+				hand1_unused[0] = hand1[0];
+				hand1_unused[1] = hand1[4];
+				break;
+			default:
+				hand1_unused[0] = hand1[0];
+				hand1_unused[1] = hand1[1];		
+			}
 			break;
 		}
 	}
 	for(int i = 0; i < num_cards-2; i++){
 		if(has_same_value(hand2[i], hand2[i+2])){
 			hand2_set_card = hand2[i];
+			switch(i){
+			case 0:
+				hand2_unused[0] = hand2[3];
+				hand2_unused[1] = hand2[4];
+				break;
+			case 1:
+				hand2_unused[0] = hand2[0];
+				hand2_unused[1] = hand2[4];
+				break;
+			default:
+				hand2_unused[0] = hand2[0];
+				hand2_unused[1] = hand2[1];		
+			}
 			break;
 		}
 	}
 
-	return value_difference(hand1_set_card, hand2_set_card);
+	int difference = value_difference(hand1_set_card, hand2_set_card);
+	if(difference!=0){
+		return difference;
+	}else{
+		difference = tiebreak_highcard(hand1_unused, hand2_unused, 2);
+	}
+	
+	return difference;
 }
 
 bool is_wheel(Card** hand, int num_cards){
