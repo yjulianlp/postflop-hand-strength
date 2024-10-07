@@ -5,8 +5,8 @@
 This project simulates post flop game scenarios in poker, allowing users to explore different game outcomes.
 
 ## Table of Contents
-- [*Requirements*](#requirements)
-- [*Usage*](#usage)
+- [Requirements](#requirements)
+- [Usage](#usage)
 ## Getting Started
 
 Follow the instructions below to build and run the project.
